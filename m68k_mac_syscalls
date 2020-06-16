@@ -1,0 +1,1196 @@
+# STORAGE ::= "[" stack_addr "]:" size | register
+# RETURN ::= type | "void"
+# PARAM ::= type " " name
+# CC_PASCAL ::= RETURN {"," PARAM}
+# RETURN_CUSTOM ::= type "@" STORAGE | "void"
+# PARAM_CUSTOM ::= type " " name "@" STORAGE
+# CC_CUSTOM ::= RETURN_CUSTOM {"," PARAM_CUSTOM}
+# SYSCALL ::= syscall_num "," name ["," ("pascal" "," CC_PASCAL | "custom" "," CC_CUSTOM)] ["," "noreturn"]
+# Warning: only basic builtin datatypes supported for now (no type*, type[], etc.)
+# Warning: all "out" params are wrong
+#   the decompiler (as of ghidra 9.1.2) doesn't show the return value when the
+#   storage for the return value is on the stack
+#   adding the out param makes it show up in the decompiler, but it uses the
+#   value, not the address
+# Calling conventions:
+#   pascal: params pushed left-to-right, callee cleanup, return value stored beyond params
+#   custom: custom storage
+0xa000, _Open
+0xa001, _Close
+0xa002, _Read
+0xa003, _Write
+0xa004, _Control
+0xa005, _Status
+0xa006, _KillIO
+0xa007, _GetVolInfo
+0xa008, _Create
+0xa009, _Delete
+0xa00a, _OpenRF
+0xa00b, _Rename
+0xa00c, _GetFileInfo
+0xa00d, _SetFileInfo
+0xa00e, _UnmountVol
+0xa00f, _MountVol
+0xa010, _Allocate
+0xa011, _GetEOF
+0xa012, _SetEOF
+0xa013, _FlushVol
+0xa014, _GetVol
+0xa015, _SetVol
+0xa016, _FInitQueue, pascal, void
+0xa017, _Eject
+0xa018, _GetFPos
+0xa019, _InitZone
+0xa01b, _SetZone
+0xa01c, _FreeMem
+0xa01f, _DisposePtr
+0xa020, _SetPtrSize
+0xa021, _GetPtrSize
+0xa023, _DisposeHandle, custom, void, pointer handle @ A0
+0xa024, _SetHandleSize
+0xa025, _GetHandleSize, custom, dword @ D0, pointer handle @ A0
+0xa027, _ReallocHandle
+0xa029, _HLock, custom, void, pointer handle @ A0
+0xa02a, _HUnlock, custom, void, pointer handle @ A0
+0xa02b, _EmptyHandle
+0xa02c, _InitApplZone, pascal, void
+0xa02d, _SetApplLimit
+0xa02e, _BlockMove, custom, dword @ D0, pointer src @ A0, pointer dst @ A1, dword size @ D0
+0xa02f, _PostEvent
+0xa030, _OSEventAvail
+0xa031, _GetOSEvent
+0xa032, _FlushEvents
+0xa033, _VInstall
+0xa034, _VRemove
+0xa035, _OffLine
+0xa036, _MoreMasters, pascal, void
+0xa037, _ReadParam
+0xa038, _WriteParam
+0xa039, _ReadDateTime
+0xa03a, _SetDateTime
+0xa03b, _Delay, custom, dword @ D0, dword ticks @ A0
+0xa03c, _CmpString
+0xa03d, _DrvrInstall
+0xa03e, _DrvrRemove
+0xa03f, _InitUtil
+0xa040, _ResrvMem
+0xa041, _SetFilLock
+0xa042, _RstFilLock
+0xa043, _SetFilType
+0xa044, _SetFPos
+0xa045, _FlushFile
+0xa047, _SetTrapAddress, custom, void, pointer trapAddr @ A0, word trapNum @ D0w
+0xa049, _HPurge, custom, void, pointer handle @ A0
+0xa04a, _HNoPurge, custom, void, pointer handle @ A0
+0xa04b, _SetGrowZone
+0xa04c, _CompactMem
+0xa04d, _PurgeMem
+0xa04e, _AddDrive
+0xa04f, _RDrvrInstall
+0xa050, _CompareString
+0xa051, _ReadXPRam
+0xa052, _WriteXPRam
+0xa054, _UprString
+0xa055, _StripAddress, custom, pointer @ D0, pointer addr @ D0
+0xa056, _LowerText
+0xa057, _SetApplBase
+0xa058, _InsTime
+0xa059, _RmvTime
+0xa05a, _PrimeTime
+0xa05b, _PowerOff
+0xa05c, _MemoryDispatch
+0xa05d, _SwapMMUMode
+0xa05e, _NMInstall
+0xa05f, _NMRemove
+0xa060, _FSDispatch
+0xa061, _MaxBlock
+0xa063, _MaxApplZone, pascal, void
+0xa064, _MoveHHi, custom, dword @ D0, pointer handle @ A0
+0xa065, _StackSpace
+0xa067, _HSetRBit, custom, void, pointer handle @ A0
+0xa068, _HClrRBit, custom, void, pointer handle @ A0
+0xa069, _HGetState, custom, byte @ D0b, pointer handle @ A0
+0xa06a, _HSetState
+0xa06b, _TestManager
+0xa06c, _InitFS
+0xa06d, _InitEvents
+0xa06e, _SlotManager
+0xa06f, _SlotVInstall
+0xa070, _SlotVRemove
+0xa071, _AttachVBL
+0xa072, _DoVBLTask
+0xa073, _OSReserved
+0xa074, _CacheMgr
+0xa075, _SIntInstall
+0xa076, _SIntRemove
+0xa077, _CountADBs
+0xa078, _GetIndADB
+0xa079, _GetADBInfo
+0xa07a, _SetADBInfo
+0xa07b, _ADBReInit, pascal, void
+0xa07c, _ADBOp
+0xa07d, _GetDefaultStartup
+0xa07e, _SetDefaultStartup
+0xa07f, _InternalWait
+0xa080, _GetVideoDefault
+0xa081, _SetVideoDefault
+0xa082, _DTInstall
+0xa083, _SetOSDefault
+0xa084, _GetOSDefault
+0xa085, _PMgrOp
+0xa086, _IOPInfoAccess
+0xa087, _IOPMsgRequest
+0xa088, _IOPMoveData
+0xa089, _SCSIAtomic
+0xa08a, _Sleep
+0xa08b, _CommToolboxDispatch
+0xa08c, _Wakeup
+0xa08d, _DebugUtil
+0xa08e, _BTreeDispatch
+0xa08f, _DeferUserFn
+0xa090, _SysEnvirons
+0xa091, _Translate24To32
+0xa092, _EgretDispatch
+0xa093, _Microseconds
+0xa094, _ServerDispatch
+0xa095, _POGOMPW
+0xa096, _SharedLibsMPW
+0xa097, _FPPriv
+0xa099, _XToolTable
+0xa09a, _vProcHelper
+0xa09b, _Messager
+0xa09c, _NewPtrStartup
+0xa09d, _MoveHLow
+0xa09e, _PowerMgrDispatch
+0xa09f, _PowerDispatch
+0xa0a0, _vMRdAddr
+0xa0a1, _vMRdData
+0xa0a2, _vMWrData
+0xa0a4, _HeapDispatch
+0xa0a5, _VisRegionChanged
+0xa0a6, _vStdEntry
+0xa0a7, _vStdExit
+0xa0ac, _FSM
+0xa0ae, _vADBProc
+0xa0af, _vMtCheck
+0xa0b0, _vCheckReMount
+0xa0b1, _vDtrmV2
+0xa0b2, _vFindDrive
+0xa0b3, _vFClose
+0xa0b4, _vFlushMDB
+0xa0b5, _vGoDriver
+0xa0b6, _vWaitUntil
+0xa0b7, _vSyncWait
+0xa0b8, _vSoundDead
+0xa0b9, _vDisptch
+0xa0ba, _vIAZInit
+0xa0bb, _vIAZPostInit
+0xa0bc, _vLaunchInit
+0xa0bd, _vCacheFlush
+0xa0be, _vSysUtil
+0xa0bf, _vLg2Phys
+0xa0c0, _vFlushCache
+0xa0c1, _vGetBlock
+0xa0c2, _vMarkBlock
+0xa0c3, _vRelBlock
+0xa0c4, _vTrashBlocks
+0xa0c5, _vTrashVBlks
+0xa0c6, _vCacheWrIP
+0xa0c7, _vCacheRdIP
+0xa0c8, _vBasicIO
+0xa0c9, _vRdBlocks
+0xa0ca, _vWrBlocks
+0xa0cb, _vSetUpTags
+0xa0cc, _vBTClose
+0xa0cd, _vBTDelete
+0xa0ce, _vBTFlush
+0xa0cf, _vBTGetRecord
+0xa0d0, _vBTInsert
+0xa0d1, _vBTOpen
+0xa0d2, _vBTSearch
+0xa0d3, _vBTUpdate
+0xa0d4, _vGetNode
+0xa0d5, _vRelNode
+0xa0d6, _vAllocNode
+0xa0d7, _vFreeNode
+0xa0d8, _vExtBTFile
+0xa0d9, _vDeallocFile
+0xa0da, _vExtendFile
+0xa0db, _vTruncateFile
+0xa0dc, _vCMSetup
+0xa0dd, _PPC
+0xa0de, _vDtrmV1
+0xa0df, _vBlkAlloc
+0xa0e0, _vBlkDeAlloc
+0xa0e1, _vFileOpen
+0xa0e2, _vPermssnChk
+0xa0e3, _vFndFilName
+0xa0e4, _vRfNCall
+0xa0e5, _vAdjEOF
+0xa0e6, _vPixel2Char
+0xa0e7, _vChar2Pixel
+0xa0e8, _vHiliteText
+0xa0e9, _vFileClose
+0xa0ea, _vFileRead
+0xa0eb, _vFileWrite
+0xa0ec, _DispatchHelper
+0xa0ed, _vUpdAltMDB
+0xa0ee, _vCkExtFS
+0xa0ef, _vDtrmV3
+0xa0f0, _vBMChk
+0xa0f1, _vTstMod
+0xa0f2, _vLocCRec
+0xa0f3, _vTreeSearch
+0xa0f4, _vMapFBlock
+0xa0f5, _vXFSearch
+0xa0f6, _vReadBM
+0xa0f7, _vDoEject
+0xa0f8, _vSegStack
+0xa0f9, _vSuperLoad
+0xa0fa, _vCmpFrm
+0xa0fb, _vNewMap
+0xa0fc, _vCheckLoad
+0xa0fd, _XTrimMeasure
+0xa0fe, _XFindWord
+0xa0ff, _XFindLine
+0xa11a, _GetZone
+0xa11d, _MaxMem
+# also outputs result code in D0...
+0xa11e, _NewPtr, custom, pointer @ A0, dword size @ D0
+# also outputs result code in D0...
+0xa122, _NewHandle, custom, pointer @ A0, dword size @ A0
+0xa126, _HandleZone
+0xa128, _RecoverHandle
+0xa12f, _PPostEvent
+0xa13d, _DrvrInstall
+0xa146, _GetTrapAddress, custom, pointer @ A0, word trapNum @ D0w
+0xa148, _PtrZone
+0xa15c, _MemoryDispatch
+0xa162, _PurgeSpace
+0xa166, _NewEmptyHandle
+0xa193, _Microseconds
+0xa198, _HWPriv
+0xa1ad, _Gestalt
+0xa200, _HOpen
+0xa207, _HGetVInfo
+0xa208, _HCreate
+0xa209, _HDelete
+0xa20a, _HOpenRF
+0xa20b, _HRename
+0xa20c, _HGetFileInfo
+0xa20d, _HSetFileInfo
+0xa20e, _HUnmountVol
+0xa210, _AllocContig
+0xa214, _HGetVol
+0xa215, _HSetVol
+0xa22e, _BlockMoveData
+0xa241, _HSetFLock
+0xa242, _HRstFLock
+0xa247, _SetOSTrapAddress
+0xa256, _StripText
+0xa260, _HFSDispatch
+0xa285, _IdleUpdate
+0xa28a, _SleepQInstall
+0xa31e, _NewPtrClear, custom, pointer @ A0, dword size @ D0
+0xa322, _NewHandleClear
+0xa346, _GetOSTrapAddress, custom, pointer @ A0, word trapNum @ D0w
+0xa3ad, _NewGestalt
+0xa43d, _DrvrInstallRsrvMem
+0xa456, _UpperText
+0xa458, _InsXTime
+0xa485, _IdleState
+0xa48a, _SleepQRemove
+0xa51e, _NewPtrSys, custom, pointer @ A0, dword size @ D0
+0xa522, _NewHandleSys
+0xa53d, _DrvrInstallRsrvMem
+0xa562, _PurgeSpaceSys
+0xa5ad, _ReplaceGestalt
+0xa647, _SetToolBoxTrapAddress
+0xa656, _StripUpperText
+0xa685, _SerialPower
+0xa71e, _NewPtrSysClear, custom, pointer @ A0, dword size @ D0
+0xa722, _NewHandleSysClear
+0xa746, _GetToolTrapAddress, custom, pointer @ A0, word trapNum @ D0w
+0xa7ad, _GetGestaltProcPtr
+0xa800, _SoundDispatch
+0xa801, _SndDisposeChannel
+0xa802, _SndAddModifier
+0xa803, _SndDoCommand
+0xa804, _SndDoImmediate
+0xa805, _SndPlay
+0xa806, _SndControl
+0xa807, _SndNewChannel
+0xa808, _InitProcMenu, pascal, void, word resID
+0xa809, _GetControlVariant, pascal, out2, pointer theControl
+0xa80a, _GetWVariant, pascal, out2, pointer theWindow
+0xa80b, _PopUpMenuSelect, pascal, out4, pointer menu, word top, word left, word popUpItem
+0xa80c, _RGetResource, pascal, out4, dword theType, word theID
+0xa80d, _Count1Resources, pascal, out2, dword theType
+0xa80e, _Get1IxResource, pascal, out4, dword theType, word index
+0xa80f, _Get1IxType, pascal, void, pointer theType, word index
+0xa810, _Unique1ID, pascal, out2, dword theType
+0xa811, _TESelView, pascal, void, pointer hTE
+0xa812, _TEPinScroll, pascal, void, word dh, word dv, pointer hTE
+0xa813, _TEAutoView, pascal, void, byte fAuto, pointer hTE
+0xa814, _SetFractEnable
+0xa815, _SCSIDispatch
+0xa816, _Pack8
+0xa817, _CopyMask, pascal, void, pointer srcBits, pointer maskBits, pointer dstBits, pointer srcRect, pointer maskRect, pointer dstRect
+0xa818, _FixATan2, pascal, out4, dword x, dword y
+0xa819, _XMunger
+0xa81a, _HOpenResFile
+0xa81b, _HCreateResFile
+0xa81c, _Count1Types, pascal, out2
+0xa81d, _InvalMenuBar, pascal, void
+0xa81e, _SaveRestoreBits
+0xa81f, _Get1Resource, pascal, out4, dword theType, word theID
+0xa820, _Get1NamedResource, pascal, out4, dword theType, pointer name
+0xa821, _MaxSizeRsrc, pascal, out4, pointer theResource
+0xa822, _ResourceDispatch
+0xa823, _AliasDispatch
+0xa824, _FSMgr
+0xa825, _MenuDispatch
+0xa826, _InsertMenuItem, pascal, void, pointer theMenu, pointer itemString, word afterItem
+0xa827, _HideDialogItem, pascal, void, pointer theDialog, word itemNo
+0xa828, _ShowDialogItem, pascal, void, pointer theDialog, word itemNo
+0xa829, _LayerDispatch
+0xa82a, _ComponentDispatch
+0xa82b, _Pack9
+0xa82c, _Pack10
+0xa82d, _Pack11
+0xa82e, _Pack12
+0xa82f, _Pack13
+0xa830, _Pack14
+0xa831, _Pack15
+0xa832, _QuickDrawGX
+0xa833, _ScrnBitMap
+0xa834, _SetFScaleDisable, pascal, void, byte fscaleDisable
+0xa835, _FontMetrics, pascal, void, pointer theMetrics
+0xa836, _GetMaskTable
+0xa837, _MeasureText, pascal, void, word count, pointer textAddr, pointer charLocs
+0xa838, _CalcMask, pascal, void, pointer srcPtr, pointer dstPtr, word srcRow, word dstRow, word height, word words
+0xa839, _SeedFill, pascal, void, pointer srcPtr, pointer dstPtr, word srcRow, word dstRow, word height, word words, word seedH, word seedV
+0xa83a, _ZoomWindow, pascal, void, pointer theWindow, word partCode, byte front
+0xa83b, _TrackBox, pascal, out1, pointer theWindow, pointer thePt, word partCode
+0xa83c, _TEGetOffset, pascal, out2, pointer pt, pointer hTE
+0xa83d, _TEDispatch
+0xa83e, _TEStyleNew, pascal, out4, pointer destRect, pointer viewRect
+0xa83f, _Long2Fix, pascal, out4, dword x
+0xa840, _Fix2Long, pascal, out4, dword x
+0xa841, _Fix2Frac, pascal, out4, dword x
+0xa842, _Frac2Fix, pascal, out4, dword x
+0xa843, _Fix2X, pascal, out4, dword x
+0xa844, _X2Fix, pascal, out4, pointer x
+0xa845, _Frac2X, pascal, out4, dword x
+0xa846, _X2Frac, pascal, out4, pointer x
+0xa847, _FracCos, pascal, out4, dword x
+0xa848, _FracSin, pascal, out4, dword x
+0xa849, _FracSqrt, pascal, out4, dword x
+0xa84a, _FracMul, pascal, out4, dword x, dword y
+0xa84b, _FracDiv, pascal, out4, dword x, dword y
+0xa84c, _UserDelay
+0xa84d, _FixDiv, pascal, out4, dword x, dword y
+0xa84e, _GetItemCmd, pascal, void, pointer theMenu, word item, pointer cmdChar
+0xa84f, _SetItemCmd, pascal, void, pointer theMenu, word item, word cmdChar
+0xa850, _InitCursor, pascal, void
+0xa851, _SetCursor, pascal, void, pointer crsr
+0xa852, _HideCursor, pascal, void
+0xa853, _ShowCursor, pascal, void
+0xa854, _FontDispatch
+0xa855, _ShieldCursor, pascal, void, pointer shieldRect, pointer offsetPt
+0xa856, _ObscureCursor, pascal, void
+0xa857, _SetEntry
+0xa858, _BitAnd, pascal, out4, dword value1, dword value2
+0xa859, _BitXOr, pascal, out4, dword value1, dword value2
+0xa85a, _BitNot, pascal, out4, dword value
+0xa85b, _BitOr, pascal, out4, dword value1, dword value2
+0xa85c, _BitShift, pascal, out4, dword value, word count
+0xa85d, _BitTst, pascal, out1, pointer bytePtr, dword bitNum
+0xa85e, _BitSet, pascal, void, pointer bytePtr, dword bitNum
+0xa85f, _BitClr, pascal, void, pointer bytePtr, dword bitNum
+0xa860, _WaitNextEvent, pascal, out1, word eventMask, pointer theEvent, dword sleep, pointer mouseRgn
+0xa861, _Random, pascal, out2
+0xa862, _ForeColor, pascal, void, dword color
+0xa863, _BackColor, pascal, void, dword color
+0xa864, _ColorBit, pascal, void, word whichBit
+0xa865, _GetPixel, pascal, out1, word h, word v
+0xa866, _StuffHex, pascal, void, pointer thingPtr, pointer s
+0xa867, _LongMul, pascal, void, dword a, dword b, pointer result
+0xa868, _FixMul, pascal, out4, dword a, dword b
+0xa869, _FixRatio, pascal, out4, word numer, word denom
+0xa86a, _HiWord, pascal, out2, dword x
+0xa86b, _LoWord, pascal, out2, dword x
+0xa86c, _FixRound, pascal, out2, dword x
+0xa86d, _InitPort, pascal, void, pointer port
+0xa86e, _InitGraf, pascal, void, pointer globalPtr
+0xa86f, _OpenPort, pascal, void, pointer port
+0xa870, _LocalToGlobal, pascal, void, pointer pt
+0xa871, _GlobalToLocal, pascal, void, pointer pt
+0xa872, _GrafDevice, pascal, void, word device
+0xa873, _SetPort, pascal, void, pointer port
+0xa874, _GetPort, pascal, void, pointer port
+0xa875, _SetPBits, pascal, void, pointer bm
+0xa876, _PortSize, pascal, void, word width, word height
+0xa877, _MovePortTo, pascal, void, word leftGlobal, word topGlobal
+0xa878, _SetOrigin, pascal, void, word h, word v
+0xa879, _SetClip, pascal, void, pointer rgn
+0xa87a, _GetClip, pascal, void, pointer rgn
+0xa87b, _ClipRect, pascal, void, pointer r
+0xa87c, _BackPat, pascal, void, pointer pat
+0xa87d, _ClosePort, pascal, void, pointer port
+0xa87e, _AddPt, pascal, void, pointer src, pointer dst
+0xa87f, _SubPt, pascal, void, pointer src, pointer dst
+0xa880, _SetPt, pascal, void, pointer pt, word h, word v
+0xa881, _EqualPt, pascal, out1, pointer pt1, pointer pt2
+0xa882, _StdText, pascal, void, word count, pointer textAddr, pointer numer, pointer denom
+0xa883, _DrawChar, pascal, void, word ch
+0xa884, _DrawString, pascal, void, pointer s
+0xa885, _DrawText, pascal, void, pointer textBuf, word firstByte, word byteCount
+0xa886, _TextWidth, pascal, out2, pointer textBuf, word firstByte, word byteCount
+0xa887, _TextFont, pascal, void, word font
+0xa888, _TextFace, pascal, void, word face
+0xa889, _TextMode, pascal, void, word mode
+0xa88a, _TextSize, pascal, void, word size
+0xa88b, _GetFontInfo, pascal, void, pointer info
+0xa88c, _StringWidth, pascal, out2, pointer s
+0xa88d, _CharWidth, pascal, out2, word ch
+0xa88e, _SpaceExtra, pascal, void, dword extra
+0xa88f, _OSDispatch
+0xa890, _StdLine, pascal, void, pointer newPt
+0xa891, _LineTo, pascal, void, word h, word v
+0xa892, _Line, pascal, void, word dh, word dv
+0xa893, _MoveTo, pascal, void, word h, word v
+0xa894, _Move, pascal, void, word dh, word dv
+0xa895, _ShutDown
+0xa896, _HidePen, pascal, void
+0xa897, _ShowPen, pascal, void
+0xa898, _GetPenState, pascal, void, pointer pnState
+0xa899, _SetPenState, pascal, void, pointer pnState
+0xa89a, _GetPen, pascal, void, pointer pt
+0xa89b, _PenSize, pascal, void, word width, word height
+0xa89c, _PenMode, pascal, void, word mode
+0xa89d, _PenPat, pascal, void, pointer pat
+0xa89e, _PenNormal, pascal, void
+0xa89f, _Unimplemented
+0xa8a0, _StdRect, pascal, void, byte verb, pointer r
+0xa8a1, _FrameRect, pascal, void, pointer r
+0xa8a2, _PaintRect, pascal, void, pointer r
+0xa8a3, _EraseRect, pascal, void, pointer r
+0xa8a4, _InverRect, pascal, void, pointer r
+0xa8a5, _FillRect, pascal, void, pointer r, pointer pat
+0xa8a6, _EqualRect, pascal, out1, pointer rect1, pointer rect2
+0xa8a7, _SetRect, pascal, void, pointer r, word left, word top, word right, word bottom
+0xa8a8, _OffsetRect, pascal, void, pointer r, word dh, word dv
+0xa8a9, _InsetRect, pascal, void, pointer r, word dh, word dv
+0xa8aa, _SectRect, pascal, out1, pointer src1, pointer src2, pointer dstRect
+0xa8ab, _UnionRect, pascal, void, pointer src1, pointer src2, pointer dstRect
+0xa8ac, _Pt2Rect, pascal, void, pointer pt1, pointer pt2, pointer dstRect
+0xa8ad, _PtInRect, pascal, out1, pointer pt, pointer r
+0xa8ae, _EmptyRect, pascal, out1, pointer r
+0xa8af, _StdRRect, pascal, void, byte verb, pointer r, word ovalWidth, word ovalHeight
+0xa8b0, _FrameRoundRect, pascal, void, pointer r, word ovalWidth, word ovalHeight
+0xa8b1, _PaintRoundRect, pascal, void, pointer r, word ovalWidth, word ovalHeight
+0xa8b2, _EraseRoundRect, pascal, void, pointer r, word ovalWidth, word ovalHeight
+0xa8b3, _InverRoundRect, pascal, void, pointer r, word ovalWidth, word ovalHeight
+0xa8b4, _FillRoundRect, pascal, void, pointer r, word ovalWidth, word ovalHeight, pointer pat
+0xa8b5, _ScriptUtil
+0xa8b6, _StdOval, pascal, void, byte verb, pointer r
+0xa8b7, _FrameOval, pascal, void, pointer r
+0xa8b8, _PaintOval, pascal, void, pointer r
+0xa8b9, _EraseOval, pascal, void, pointer r
+0xa8ba, _InvertOval, pascal, void, pointer r
+0xa8bb, _FillOval, pascal, void, pointer r, pointer pat
+0xa8bc, _SlopeFromAngle, pascal, out4, word angle
+0xa8bd, _StdArc, pascal, void, byte verb, pointer r, word startAngle, word arcAngle
+0xa8be, _FrameArc, pascal, void, pointer r, word startAngle, word arcAngle
+0xa8bf, _PaintArc, pascal, void, pointer r, word startAngle, word arcAngle
+0xa8c0, _EraseArc, pascal, void, pointer r, word startAngle, word arcAngle
+0xa8c1, _InvertArc, pascal, void, pointer r, word startAngle, word arcAngle
+0xa8c2, _FillArc, pascal, void, pointer r, word startAngle, word arcAngle, pointer pat
+0xa8c3, _PtToAngle, pascal, void, pointer r, pointer pt, pointer angle
+0xa8c4, _AngleFromSlope, pascal, out2, dword slope
+0xa8c5, _StdPoly, pascal, void, byte verb, pointer poly
+0xa8c6, _FramePoly, pascal, void, pointer poly
+0xa8c7, _PaintPoly, pascal, void, pointer poly
+0xa8c8, _ErasePoly, pascal, void, pointer poly
+0xa8c9, _InvertPoly, pascal, void, pointer poly
+0xa8ca, _FillPoly, pascal, void, pointer poly, pointer pat
+0xa8cb, _OpenPoly, pascal, out4
+0xa8cc, _ClosePoly, pascal, void
+0xa8cd, _KillPoly, pascal, void, pointer poly
+0xa8ce, _OffsetPoly, pascal, void, pointer poly, word dh, word dv
+0xa8cf, _PackBits, pascal, void, pointer srcPtr, pointer dstPtr, word srcBytes
+0xa8d0, _UnpackBits, pascal, void, pointer srcPtr, pointer dstPtr, word dstBytes
+0xa8d1, _StdRgn, pascal, void, byte verb, pointer rgn
+0xa8d2, _FrameRgn, pascal, void, pointer rgn
+0xa8d3, _PaintRgn, pascal, void, pointer rgn
+0xa8d4, _EraseRgn, pascal, void, pointer rgn
+0xa8d5, _InverRgn, pascal, void, pointer rgn
+0xa8d6, _FillRgn, pascal, void, pointer rgn, pointer pat
+0xa8d7, _BitMapToRegion, pascal, out2, pointer region, pointer bMap
+0xa8d8, _NewRgn, pascal, out4
+0xa8d9, _DisposeRgn, pascal, void, pointer rgn
+0xa8da, _OpenRgn, pascal, void
+0xa8db, _CloseRgn, pascal, void, pointer dstRgn
+0xa8dc, _CopyRgn, pascal, void, pointer srcRgn, pointer dstRgn
+0xa8dd, _SetEmptyRgn, pascal, void, pointer rgn
+0xa8de, _SetRecRgn, pascal, void, pointer rgn, word left, word top, word right, word bottom
+0xa8df, _RectRgn, pascal, void, pointer rgn, pointer r
+0xa8e0, _OffsetRgn, pascal, void, pointer rgn, word dh, word dv
+0xa8e1, _InsetRgn, pascal, void, pointer rgn, word dh, word dv
+0xa8e2, _EmptyRgn, pascal, out1, pointer rgn
+0xa8e3, _EqualRgn, pascal, out1, pointer rgnA, pointer rgnB
+0xa8e4, _SectRgn, pascal, void, pointer srcRgnA, pointer srcRgnB, pointer dstRgn
+0xa8e5, _UnionRgn, pascal, void, pointer srcRgnA, pointer srcRgnB, pointer dstRgn
+0xa8e6, _DiffRgn, pascal, void, pointer srcRgnA, pointer srcRgnB, pointer dstRgn
+0xa8e7, _XOrRgn, pascal, void, pointer srcRgnA, pointer srcRgnB, pointer dstRgn
+0xa8e8, _PtInRgn, pascal, out1, pointer pt, pointer rgn
+0xa8e9, _RectInRgn, pascal, out1, pointer r, pointer rgn
+0xa8ea, _SetStdProcs, pascal, void, pointer procs
+0xa8eb, _StdBits, pascal, void, pointer srcBits, pointer srcRect, pointer dstRect, word mode, pointer maskRgn
+0xa8ec, _CopyBits, pascal, void, pointer srcBits, pointer dstBits, pointer srcRect, pointer dstRect, word mode, pointer maskRgn
+0xa8ed, _StdTxMeas, pascal, out2, word byteCount, pointer textAddr, pointer numer, pointer denom, pointer info
+0xa8ee, _StdGetPic, pascal, void, pointer dataPtr, word byteCount
+0xa8ef, _ScrollRect, pascal, void, pointer r, word dh, word dv, pointer updateRgn
+0xa8f0, _StdPutPic, pascal, void, pointer dataPtr, word byteCount
+0xa8f1, _StdComment, pascal, void, word kind, word dataSize, pointer dataHandle
+0xa8f2, _PicComment, pascal, void, word kind, word dataSize, pointer dataHandle
+0xa8f3, _OpenPicture, pascal, out4, pointer picFrame
+0xa8f4, _ClosePicture, pascal, void
+0xa8f5, _KillPicture, pascal, void, pointer myPicture
+0xa8f6, _DrawPicture, pascal, void, pointer myPicture, pointer dstRect
+0xa8f7, _Layout
+0xa8f8, _ScalePt, pascal, void, pointer pt, pointer srcRect, pointer dstRect
+0xa8f9, _MapPt, pascal, void, pointer pt, pointer srcRect, pointer dstRect
+0xa8fa, _MapRect, pascal, void, pointer r, pointer srcRect, pointer dstRect
+0xa8fb, _MapRgn, pascal, void, pointer rgn, pointer srcRect, pointer dstRect
+0xa8fc, _MapPoly, pascal, void, pointer poly, pointer srcRect, pointer dstRect
+0xa8fd, _PrGlue
+0xa8fe, _InitFonts, pascal, void
+0xa8ff, _GetFName, pascal, void, word familyID, pointer name
+0xa900, _GetFNum, pascal, void, pointer name, pointer familyID
+0xa901, _FMSwapFont, pascal, out4, pointer inRec
+0xa902, _RealFont, pascal, out1, word fontNum, word size
+0xa903, _SetFontLock, pascal, void, byte lockFlag
+0xa904, _DrawGrowIcon, pascal, void, pointer theWindow
+0xa905, _DragGrayRgn, pascal, out4, pointer theRgn, pointer startPt, pointer limitRect, pointer slopRect, word axis, pointer actionProc
+0xa906, _NewString, pascal, out4, pointer theString
+0xa907, _SetString, pascal, void, pointer theString, pointer strNew
+0xa908, _ShowHide, pascal, void, pointer theWindow, byte showFlag
+0xa909, _CalcVis, pascal, void, pointer window
+0xa90a, _CalcVBehind, pascal, void, pointer startWindow, pointer clobberedRgn
+0xa90b, _ClipAbove, pascal, void, pointer window
+0xa90c, _PaintOne, pascal, void, pointer window, pointer clobberedRgn
+0xa90d, _PaintBehind, pascal, void, pointer startWindow, pointer clobberedRgn
+0xa90e, _SaveOld, pascal, void, pointer window
+0xa90f, _DrawNew, pascal, void, pointer window, byte update
+0xa910, _GetWMgrPort, pascal, void, pointer wPort
+0xa911, _CheckUpDate, pascal, out1, pointer theEvent
+0xa912, _InitWindows, pascal, void
+0xa913, _NewWindow, pascal, out4, pointer wStorage, pointer boundsRect, pointer title, byte visible, word theProc, pointer behind, byte goAwayFlag, dword refCon
+0xa914, _DisposeWindow, pascal, void, pointer theWindow
+0xa915, _ShowWindow, pascal, void, pointer theWindow
+0xa916, _HideWindow, pascal, void, pointer theWindow
+0xa917, _GetWRefCon, pascal, out4, pointer theWindow
+0xa918, _SetWRefCon, pascal, void, pointer theWindow, dword data
+0xa919, _GetWTitle, pascal, void, pointer theWindow, pointer title
+0xa91a, _SetWTitle, pascal, void, pointer theWindow, pointer title
+0xa91b, _MoveWindow, pascal, void, pointer theWindow, word hGlobal, word vGlobal, byte front
+0xa91c, _HiliteWindow, pascal, void, pointer theWindow, byte fHilite
+0xa91d, _SizeWindow, pascal, void, pointer theWindow, word w, word h, byte fUpdate
+0xa91e, _TrackGoAway, pascal, out1, pointer theWindow, pointer thePt
+0xa91f, _SelectWindow, pascal, void, pointer theWindow
+0xa920, _BringToFront, pascal, void, pointer theWindow
+0xa921, _SendBehind, pascal, void, pointer theWindow, pointer behindWindow
+0xa922, _BeginUpDate, pascal, void, pointer theWindow
+0xa923, _EndUpDate, pascal, void, pointer theWindow
+0xa924, _FrontWindow, pascal, out4
+0xa925, _DragWindow, pascal, void, pointer theWindow, pointer startPt, pointer boundsRect
+0xa926, _DragTheRgn
+0xa927, _InvalRgn, pascal, void, pointer badRgn
+0xa928, _InvalRect, pascal, void, pointer badRect
+0xa929, _ValidRgn, pascal, void, pointer goodRgn
+0xa92a, _ValidRect, pascal, void, pointer goodRect
+0xa92b, _GrowWindow, pascal, out4, pointer theWindow, pointer startPt, pointer bBox
+0xa92c, _FindWindow, pascal, out2, pointer thePoint, pointer theWindow
+0xa92d, _CloseWindow, pascal, void, pointer theWindow
+0xa92e, _SetWindowPic, pascal, void, pointer theWindow, pointer pic
+0xa92f, _GetWindowPic, pascal, out4, pointer theWindow
+0xa930, _InitMenus, pascal, void
+0xa931, _NewMenu, pascal, out4, word menuID, pointer menuTitle
+0xa932, _DisposeMenu, pascal, void, pointer theMenu
+0xa933, _AppendMenu, pascal, void, pointer menu, pointer data
+0xa934, _ClearMenuBar, pascal, void
+0xa935, _InsertMenu, pascal, void, pointer theMenu, word beforeID
+0xa936, _DeleteMenu, pascal, void, word menuID
+0xa937, _DrawMenuBar, pascal, void
+0xa938, _HiliteMenu, pascal, void, word menuID
+0xa939, _EnableItem, pascal, void, pointer theMenu, word item
+0xa93a, _DisableItem, pascal, void, pointer theMenu, word item
+0xa93b, _GetMenuBar, pascal, out4
+0xa93c, _SetMenuBar, pascal, void, pointer menuList
+0xa93d, _MenuSelect, pascal, out4, pointer startPt
+0xa93e, _MenuKey, pascal, out4, word ch
+0xa93f, _GetItmIcon, pascal, void, pointer theMenu, word item, pointer iconIndex
+0xa940, _SetItmIcon, pascal, void, pointer theMenu, word item, byte iconIndex
+0xa941, _GetItmStyle
+0xa942, _SetItmStyle, pascal, void, pointer theMenu, word item, word chStyle
+0xa943, _GetItmMark, pascal, void, pointer theMenu, word item, pointer markChar
+0xa944, _SetItmMark, pascal, void, pointer theMenu, word item, word markChar
+0xa945, _CheckItem, pascal, void, pointer theMenu, word item, byte checked
+0xa946, _GetMenuItemText, pascal, void, pointer theMenu, word item, pointer itemString
+0xa947, _SetMenuItemText, pascal, void, pointer theMenu, word item, pointer itemString
+0xa948, _CalcMenuSize, pascal, void, pointer theMenu
+0xa949, _GetMenuHandle, pascal, out4, word menuID
+0xa94a, _SetMFlash, pascal, void, word count
+0xa94b, _PlotIcon, pascal, void, pointer theRect, pointer theIcon
+0xa94c, _FlashMenuBar, pascal, void, word menuID
+0xa94d, _AppendResMenu, pascal, void, pointer theMenu, dword theType
+0xa94e, _PinRect, pascal, out4, pointer theRect, pointer thePt
+0xa94f, _DeltaPoint, pascal, out4, pointer ptA, pointer ptB
+0xa950, _CountMItems, pascal, out2, pointer theMenu
+0xa951, _InsertResMenu, pascal, void, pointer theMenu, dword theType, word afterItem
+0xa952, _DeleteMenuItem, pascal, void, pointer theMenu, word item
+0xa953, _UpdtControl, pascal, void, pointer theWindow, pointer updateRgn
+0xa954, _NewControl, pascal, out4, pointer theWindow, pointer boundsRect, pointer title, byte visible, word value, word min, word max, word procID, dword refCon
+0xa955, _DisposeControl, pascal, void, pointer theControl
+0xa956, _KillControls, pascal, void, pointer theWindow
+0xa957, _ShowControl, pascal, void, pointer theControl
+0xa958, _HideControl, pascal, void, pointer theControl
+0xa959, _MoveControl, pascal, void, pointer theControl, word h, word v
+0xa95a, _GetControlReference, pascal, out4, pointer theControl
+0xa95b, _SetControlReference, pascal, void, pointer theControl, dword data
+0xa95c, _SizeControl, pascal, void, pointer theControl, word w, word h
+0xa95d, _HiliteControl, pascal, void, pointer theControl, word hiliteState
+0xa95e, _GetControlTitle, pascal, void, pointer theControl, pointer title
+0xa95f, _SetControlTitle, pascal, void, pointer theControl, pointer title
+0xa960, _GetControlValue, pascal, out2, pointer theControl
+0xa961, _GetControlMinimum, pascal, out2, pointer theControl
+0xa962, _GetControlMaximum, pascal, out2, pointer theControl
+0xa963, _SetControlValue, pascal, void, pointer theControl, word theValue
+0xa964, _SetControlMinimum, pascal, void, pointer theControl, word minValue
+0xa965, _SetControlMaximum, pascal, void, pointer theControl, word maxValue
+0xa966, _TestControl, pascal, out2, pointer theControl, pointer thePt
+0xa967, _DragControl, pascal, void, pointer theControl, pointer startPt, pointer limitRect, pointer slopRect, word axis
+0xa968, _TrackControl, pascal, out2, pointer theControl, pointer thePoint, pointer actionProc
+0xa969, _DrawControls, pascal, void, pointer theWindow
+0xa96a, _GetControlAction, pascal, out4, pointer theControl
+0xa96b, _SetControlAction, pascal, void, pointer theControl, pointer actionProc
+0xa96c, _FindControl, pascal, out2, pointer thePoint, pointer theWindow, pointer theControl
+0xa96d, _Draw1Control, pascal, void, pointer theControl
+0xa96e, _Dequeue
+0xa96f, _Enqueue
+0xa970, _GetNextEvent, pascal, out1, word eventMask, pointer theEvent
+0xa971, _EventAvail, pascal, out1, word eventMask, pointer theEvent
+0xa972, _GetMouse, pascal, void, pointer mouseLoc
+0xa973, _StillDown, pascal, out1
+0xa974, _Button, pascal, out1
+0xa975, _TickCount, pascal, out4
+0xa976, _GetKeys, pascal, void, pointer theKeys
+0xa977, _WaitMouseUp, pascal, out1
+0xa978, _UpdtDialog, pascal, void, pointer theDialog, pointer updateRgn
+0xa979, _CouldDialog
+0xa97a, _FreeDialog
+0xa97b, _InitDialogs, pascal, void, pointer resumeProc
+0xa97c, _GetNewDialog, pascal, out4, word dialogID, pointer dStorage, pointer behind
+0xa97d, _NewDialog, pascal, out4, pointer wStorage, pointer boundsRect, pointer title, byte visible, word procID, pointer behind, byte goAwayFlag, dword refCon, pointer itmLstHndl
+0xa97e, _SelectDialogItemText, pascal, void, pointer theDialog, word itemNo, word strtSel, word endSel
+0xa97f, _IsDialogEvent, pascal, out1, pointer theEvent
+0xa980, _DialogSelect, pascal, out1, pointer theEvent, pointer theDialog, pointer itemHit
+0xa981, _DrawDialog, pascal, void, pointer theDialog
+0xa982, _CloseDialog, pascal, void, pointer theDialog
+0xa983, _DisposeDialog, pascal, void, pointer theDialog
+0xa984, _FindDialogItem, pascal, out2, pointer theDialog, pointer thePt
+0xa985, _Alert, pascal, out2, word alertID, pointer filterProc
+0xa986, _StopAlert, pascal, out2, word alertID, pointer filterProc
+0xa987, _NoteAlert, pascal, out2, word alertID, pointer filterProc
+0xa988, _CautionAlert, pascal, out2, word alertID, pointer filterProc
+0xa989, _CouldAlert
+0xa98a, _FreeAlert
+0xa98b, _ParamText, pascal, void, pointer param0, pointer param1, pointer param2, pointer param3
+0xa98c, _ErrorSound, pascal, void, pointer soundProc
+0xa98d, _GetDialogItem, pascal, void, pointer theDialog, word itemNo, pointer itemType, pointer item, pointer box
+0xa98e, _SetDialogItem, pascal, void, pointer theDialog, word itemNo, word itemType, pointer item, pointer box
+0xa98f, _SetDialogItemText, pascal, void, pointer item, pointer text
+0xa990, _GetDialogItemText, pascal, void, pointer item, pointer text
+0xa991, _ModalDialog, pascal, void, pointer filterProc, pointer itemHit
+0xa992, _DetachResource, pascal, void, pointer theResource
+0xa993, _SetResPurge, pascal, void, byte install
+0xa994, _CurResFile, pascal, out2
+0xa995, _InitResources, pascal, out2
+0xa996, _RsrcZoneInit, pascal, void
+0xa997, _OpenResFile, pascal, out2, pointer fileName
+0xa998, _UseResFile, pascal, void, word refNum
+0xa999, _UpdateResFile, pascal, void, word refNum
+0xa99a, _CloseResFile, pascal, void, word refNum
+0xa99b, _SetResLoad, pascal, void, byte load
+0xa99c, _CountResources, pascal, out2, dword theType
+0xa99d, _GetIndResource, pascal, out4, dword theType, word index
+0xa99e, _CountTypes, pascal, out2
+0xa99f, _GetIndType, pascal, void, pointer theType, word index
+0xa9a0, _GetResource, pascal, out4, dword theType, word theID
+0xa9a1, _GetNamedResource, pascal, out4, dword theType, pointer name
+0xa9a2, _LoadResource, pascal, void, pointer theResource
+0xa9a3, _ReleaseResource, pascal, void, pointer theResource
+0xa9a4, _HomeResFile, pascal, out2, pointer theResource
+0xa9a5, _SizeRsrc, pascal, out4, pointer theResource
+0xa9a6, _GetResAttrs, pascal, out2, pointer theResource
+0xa9a7, _SetResAttrs, pascal, void, pointer theResource, word attrs
+0xa9a8, _GetResInfo, pascal, void, pointer theResource, pointer theID, pointer theType, pointer name
+0xa9a9, _SetResInfo, pascal, void, pointer theResource, word theID, pointer name
+0xa9aa, _ChangedResource, pascal, void, pointer theResource
+0xa9ab, _AddResource, pascal, void, pointer theResource, dword theType, word theID, pointer name
+0xa9ac, _AddReference
+0xa9ad, _RmveResource, pascal, void, pointer theResource
+0xa9ae, _RmveReference
+0xa9af, _ResError, pascal, out2
+0xa9b0, _WriteResource, pascal, void, pointer theResource
+0xa9b1, _CreateResFile, pascal, void, pointer fileName
+0xa9b2, _SystemEvent, pascal, out1, pointer theEvent
+0xa9b3, _SystemClick, pascal, void, pointer theEvent, pointer theWindow
+0xa9b4, _SystemTask, pascal, void
+0xa9b5, _SystemMenu, pascal, void, dword menuResult
+0xa9b6, _OpenDeskAcc, pascal, out2, pointer deskAccName
+0xa9b7, _CloseDeskAcc, pascal, void, word refNum
+0xa9b8, _GetPattern, pascal, out4, word patternID
+0xa9b9, _GetCursor, pascal, out4, word cursorID
+0xa9ba, _GetString, pascal, out4, word stringID
+0xa9bb, _GetIcon, pascal, out4, word iconID
+0xa9bc, _GetPicture, pascal, out4, word pictureID
+0xa9bd, _GetNewWindow, pascal, out4, word windowID, pointer wStorage, pointer behind
+0xa9be, _GetNewControl, pascal, out4, word controlID, pointer owner
+0xa9bf, _GetRMenu, pascal, out4, word resourceID
+0xa9c0, _GetNewMBar, pascal, out4, word menuBarID
+0xa9c1, _UniqueID, pascal, out2, dword theType
+0xa9c2, _SysEdit, pascal, out1, word editCmd
+0xa9c3, _KeyTranslate, pascal, out4, pointer transData, word keycode, pointer state
+0xa9c4, _OpenRFPerm, pascal, out2, pointer fileName, word vRefNum, byte permission
+0xa9c5, _RsrcMapEntry, pascal, out4, pointer theResource
+0xa9c6, _SecondsToDate
+0xa9c7, _DateToSeconds
+0xa9c8, _SysBeep, pascal, void, word duration
+0xa9c9, _SysError, custom, void, dword errorCode @ D0, noreturn
+0xa9ca, _PutIcon
+0xa9cb, _TEGetText, pascal, out4, pointer hTE
+0xa9cc, _TEInit, pascal, void
+0xa9cd, _TEDispose, pascal, void, pointer hTE
+0xa9ce, _TETextBox, pascal, void, pointer text, dword length, pointer box, word just
+0xa9cf, _TESetText, pascal, void, pointer text, dword length, pointer hTE
+0xa9d0, _TECalText, pascal, void, pointer hTE
+0xa9d1, _TESetSelect, pascal, void, dword selStart, dword selEnd, pointer hTE
+0xa9d2, _TENew, pascal, out4, pointer destRect, pointer viewRect
+0xa9d3, _TEUpdate, pascal, void, pointer rUpdate, pointer hTE
+0xa9d4, _TEClick, pascal, void, pointer pt, byte fExtend, pointer h
+0xa9d5, _TECopy, pascal, void, pointer hTE
+0xa9d6, _TECut, pascal, void, pointer hTE
+0xa9d7, _TEDelete, pascal, void, pointer hTE
+0xa9d8, _TEActivate, pascal, void, pointer hTE
+0xa9d9, _TEDeactivate, pascal, void, pointer hTE
+0xa9da, _TEIdle, pascal, void, pointer hTE
+0xa9db, _TEPaste, pascal, void, pointer hTE
+0xa9dc, _TEKey, pascal, void, word key, pointer hTE
+0xa9dd, _TEScroll, pascal, void, word dh, word dv, pointer hTE
+0xa9de, _TEInsert, pascal, void, pointer text, dword length, pointer hTE
+0xa9df, _TESetAlignment, pascal, void, word just, pointer hTE
+0xa9e0, _Munger, pascal, out4, pointer h, dword offset, pointer ptr1, dword len1, pointer ptr2, dword len2
+0xa9e1, _HandToHand
+0xa9e2, _PtrToXHand
+0xa9e3, _PtrToHand
+0xa9e4, _HandAndHand
+0xa9e5, _InitPack, pascal, void, word packID
+0xa9e6, _InitAllPacks, pascal, void
+0xa9e7, _Pack0
+0xa9e8, _Pack1
+0xa9e9, _Pack2
+0xa9ea, _Pack3
+0xa9eb, _FP68K
+0xa9ec, _Elems68K
+0xa9ed, _Pack6
+0xa9ee, _DECSTR68K
+0xa9ef, _PtrAndHand
+0xa9f0, _LoadSeg
+0xa9f1, _UnLoadSeg, pascal, void, pointer routineAddr
+0xa9f2, _Launch
+0xa9f3, _Chain
+0xa9f4, _ExitToShell, pascal, void, noreturn
+0xa9f5, _GetAppParms, pascal, void, pointer apName, pointer apRefNum, pointer apParam
+0xa9f6, _GetResFileAttrs, pascal, out2, word refNum
+0xa9f7, _SetResFileAttrs, pascal, void, word refNum, word attrs
+0xa9f8, _MethodDispatch
+0xa9f9, _InfoScrap, pascal, out4
+0xa9fa, _UnloadScrap, pascal, out4
+0xa9fb, _LoadScrap, pascal, out4
+0xa9fc, _ZeroScrap, pascal, out4
+0xa9fd, _GetScrap, pascal, out4, pointer hDest, dword theType, pointer offset
+0xa9fe, _PutScrap, pascal, out4, dword length, dword theType, pointer source
+0xa9ff, _Debugger, pascal, void
+0xaa00, _OpenCPort, pascal, void, pointer port
+0xaa01, _InitCPort, pascal, void, pointer port
+0xaa02, _CloseCPort
+0xaa03, _NewPixMap, pascal, out4
+0xaa04, _DisposePixMap, pascal, void, pointer pm
+0xaa05, _CopyPixMap, pascal, void, pointer srcPM, pointer dstPM
+0xaa06, _SetPortPix, pascal, void, pointer pm
+0xaa07, _NewPixPat, pascal, out4
+0xaa08, _DisposePixPat, pascal, void, pointer pp
+0xaa09, _CopyPixPat, pascal, void, pointer srcPP, pointer dstPP
+0xaa0a, _PenPixPat, pascal, void, pointer pp
+0xaa0b, _BackPixPat, pascal, void, pointer pp
+0xaa0c, _GetPixPat, pascal, out4, word patID
+0xaa0d, _MakeRGBPat, pascal, void, pointer pp, pointer myColor
+0xaa0e, _FillCRect, pascal, void, pointer r, pointer pp
+0xaa0f, _FillCOval, pascal, void, pointer r, pointer pp
+0xaa10, _FillCRoundRect, pascal, void, pointer r, word ovalWidth, word ovalHeight, pointer pp
+0xaa11, _FillCArc, pascal, void, pointer r, word startAngle, word arcAngle, pointer pp
+0xaa12, _FillCRgn, pascal, void, pointer rgn, pointer pp
+0xaa13, _FillCPoly, pascal, void, pointer poly, pointer pp
+0xaa14, _RGBForeColor, pascal, void, pointer color
+0xaa15, _RGBBackColor, pascal, void, pointer color
+0xaa16, _SetCPixel, pascal, void, word h, word v, pointer cPix
+0xaa17, _GetCPixel, pascal, void, word h, word v, pointer cPix
+0xaa18, _GetCTable, pascal, out4, word ctID
+0xaa19, _GetForeColor, pascal, void, pointer color
+0xaa1a, _GetBackColor, pascal, void, pointer color
+0xaa1b, _GetCCursor, pascal, out4, word crsrID
+0xaa1c, _SetCCursor, pascal, void, pointer cCrsr
+0xaa1d, _AllocCursor, pascal, void
+0xaa1e, _GetCIcon, pascal, out4, word iconID
+0xaa1f, _PlotCIcon, pascal, void, pointer theRect, pointer theIcon
+0xaa20, _OpenCPicture, pascal, out4, pointer newHeader
+0xaa21, _OpColor, pascal, void, pointer color
+0xaa22, _HiliteColor, pascal, void, pointer color
+0xaa23, _CharExtra, pascal, void, dword extra
+0xaa24, _DisposeCTable, pascal, void, pointer cTable
+0xaa25, _DisposeCIcon, pascal, void, pointer theIcon
+0xaa26, _DisposeCCursor, pascal, void, pointer cCrsr
+0xaa27, _GetMaxDevice, pascal, out4, pointer globalRect
+0xaa28, _GetCTSeed, pascal, out4
+0xaa29, _GetDeviceList, pascal, out4
+0xaa2a, _GetMainDevice, pascal, out4
+0xaa2b, _GetNextDevice, pascal, out4, pointer curDevice
+0xaa2c, _TestDeviceAttribute, pascal, out1, pointer gdh, word attribute
+0xaa2d, _SetDeviceAttribute, pascal, void, pointer gdh, word attribute, byte value
+0xaa2e, _InitGDevice, pascal, void, word qdRefNum, dword mode, pointer gdh
+0xaa2f, _NewGDevice, pascal, out4, word refNum, dword mode
+0xaa30, _DisposeGDevice, pascal, void, pointer gdh
+0xaa31, _SetGDevice, pascal, void, pointer gd
+0xaa32, _GetGDevice, pascal, out4
+0xaa33, _Color2Index, pascal, out4, pointer myColor
+0xaa34, _Index2Color, pascal, void, dword index, pointer aColor
+0xaa35, _InvertColor, pascal, void, pointer myColor
+0xaa36, _RealColor, pascal, out1, pointer color
+0xaa37, _GetSubTable, pascal, void, pointer myColors, word iTabRes, pointer targetTbl
+0xaa38, _UpdatePixMap
+0xaa39, _MakeITable, pascal, void, pointer cTabH, pointer iTabH, word res
+0xaa3a, _AddSearch, pascal, void, pointer searchProc
+0xaa3b, _AddComp, pascal, void, pointer compProc
+0xaa3c, _SetClientID, pascal, void, word id
+0xaa3d, _ProtectEntry, pascal, void, word index, byte protect
+0xaa3e, _ReserveEntry, pascal, void, word index, byte reserve
+0xaa3f, _SetEntries, pascal, void, word start, word count, pointer aTable
+0xaa40, _QDError, pascal, out2
+0xaa41, _SetWinColor, pascal, void, pointer theWindow, pointer newColorTable
+0xaa42, _GetAuxWin, pascal, out1, pointer theWindow, pointer awHndl
+0xaa43, _SetControlColor, pascal, void, pointer theControl, pointer newColorTable
+0xaa44, _GetAuxiliaryControlRecord, pascal, out1, pointer theControl, pointer acHndl
+0xaa45, _NewCWindow, pascal, out4, pointer wStorage, pointer boundsRect, pointer title, byte visible, word procID, pointer behind, byte goAwayFlag, dword refCon
+0xaa46, _GetNewCWindow, pascal, out4, word windowID, pointer wStorage, pointer behind
+0xaa47, _SetDeskCPat, pascal, void, pointer deskPixPat
+0xaa48, _GetCWMgrPort, pascal, void, pointer wMgrCPort
+0xaa49, _SaveEntries, pascal, void, pointer srcTable, pointer resultTable, pointer selection
+0xaa4a, _RestoreEntries, pascal, void, pointer srcTable, pointer dstTable, pointer selection
+0xaa4b, _NewColorDialog, pascal, out4, pointer dStorage, pointer boundsRect, pointer title, byte visible, word procID, pointer behind, byte goAwayFlag, dword refCon, pointer items
+0xaa4c, _DelSearch, pascal, void, pointer searchProc
+0xaa4d, _DelComp, pascal, void, pointer compProc
+0xaa4e, _SetStdCProcs, pascal, void, pointer procs
+0xaa4f, _CalcCMask, pascal, void, pointer srcBits, pointer dstBits, pointer srcRect, pointer dstRect, pointer seedRGB, pointer matchProc, dword matchData
+0xaa50, _SeedCFill, pascal, void, pointer srcBits, pointer dstBits, pointer srcRect, pointer dstRect, word seedH, word seedV, pointer matchProc, dword matchData
+0xaa51, _CopyDeepMask, pascal, void, pointer srcBits, pointer maskBits, pointer dstBits, pointer srcRect, pointer maskRect, pointer dstRect, word mode, pointer maskRgn
+0xaa52, _HighLevelFSDispatch
+0xaa53, _DictionaryDispatch
+0xaa54, _TextServicesDispatch
+0xaa55, _KobeMgr
+0xaa56, _SpeechRecognitionDispatch
+0xaa57, _DockingDispatch
+0xaa58, _NewKernelDispatch
+0xaa59, _MixedModeDispatch
+0xaa5a, _CodeFragmentDispatch
+0xaa5b, _PBRemoteAccess
+0xaa5c, _OCEUtils
+0xaa5d, _DigitalSignature
+0xaa5e, _OCETBDispatch
+0xaa5f, _OCEAuthentication
+0xaa60, _DeleteMCEntries, pascal, void, word menuID, word menuItem
+0xaa61, _GetMCInfo, pascal, out4
+0xaa62, _SetMCInfo, pascal, void, pointer menuCTbl
+0xaa63, _DisposeMCInfo, pascal, void, pointer menuCTbl
+0xaa64, _GetMCEntry, pascal, out4, word menuID, word menuItem
+0xaa65, _SetMCEntries, pascal, void, word numEntries, pointer menuCEntries
+0xaa66, _MenuChoice, pascal, out4
+0xaa67, _ModalDialogMenuSetup
+0xaa68, _DialogDispatch
+0xaa69, _UserNameNotification
+0xaa6a, _DeviceMgr
+0xaa6b, _PowerPCFuture
+0xaa6c, _PenMacMgr
+0xaa6d, _LanguageMgr
+0xaa6e, _AppleGuideDispatch
+0xaa90, _InitPalettes, pascal, void
+0xaa91, _NewPalette, pascal, out4, word entries, pointer srcColors, word srcUsage, word srcTolerance
+0xaa92, _GetNewPalette, pascal, out4, word PaletteID
+0xaa93, _DisposePalette, pascal, void, pointer srcPalette
+0xaa94, _ActivatePalette, pascal, void, pointer srcWindow
+0xaa95, _SetPalette, pascal, void, pointer dstWindow, pointer srcPalette, word nCUpdates
+0xaa96, _GetPalette, pascal, out4, pointer srcWindow
+0xaa97, _PmForeColor, pascal, void, word dstEntry
+0xaa98, _PmBackColor, pascal, void, word dstEntry
+0xaa99, _AnimateEntry, pascal, void, pointer dstWindow, word dstEntry, pointer srcRGB
+0xaa9a, _AnimatePalette, pascal, void, pointer dstWindow, pointer srcCTab, word srcIndex, word dstEntry, word dstLength
+0xaa9b, _GetEntryColor, pascal, void, pointer srcPalette, word srcEntry, pointer dstRGB
+0xaa9c, _SetEntryColor, pascal, void, pointer dstPalette, word dstEntry, pointer srcRGB
+0xaa9d, _GetEntryUsage, pascal, void, pointer srcPalette, word srcEntry, pointer dstUsage, pointer dstTolerance
+0xaa9e, _SetEntryUsage, pascal, void, pointer dstPalette, word dstEntry, word srcUsage, word srcTolerance
+0xaa9f, _CTab2Palette, pascal, void, pointer srcCTab, pointer dstPalette, word srcUsage, word srcTolerance
+0xaaa0, _Palette2CTab, pascal, void, pointer srcPalette, pointer dstCTab
+0xaaa1, _CopyPalette, pascal, void, pointer srcPalette, pointer dstPalette, word srcEntry, word dstEntry, word dstLength
+0xaaa2, _PaletteDispatch
+0xaaa3, _CodecDispatch
+0xaaa4, _ALMDispatch
+0xaaaa, _QuickTimeDispatch
+0xaadb, _CursorDeviceDispatch
+0xaadd, _HumanInterfaceUtilsDispatch
+0xaaee, _AppleScript
+0xaaf0, _PCCardDispatch
+0xaaf1, _ATAMgr
+0xaaf2, _ControlStripDispatch
+0xaaf3, _ExpansionBusDispatch
+0xaaf4, _InterruptMgr
+0xaafa, _InitApplication
+0xaafb, _CleanupApplication
+0xaafe, _MixedModeMagic
+0xab00, _BitBlt
+0xab01, _BitsToMap
+0xab02, _BitsToPix
+0xab03, _Jackson
+0xab04, _ColorMap
+0xab05, _CopyHandle
+0xab06, _CullPoints
+0xab07, _PutPicByte
+0xab08, _PutPicOp
+0xab09, _DrawArc
+0xab0a, _DrawLine
+0xab0b, _DrawSlab
+0xab0c, _FastSlabMode
+0xab0d, _GetSeek
+0xab0e, _MakeScaleTbl
+0xab0f, _CheckPic
+0xab10, _DoLine
+0xab11, _OldPatToNew
+0xab12, _PackRgn
+0xab13, _PatConvert
+0xab14, _PatDither
+0xab15, _PatExpand
+0xab16, _PInit
+0xab17, _PortToMap
+0xab18, _PushVerb
+0xab19, _PutLine
+0xab1a, _PutOval
+0xab1b, _PutRgn
+0xab1c, _NewTempBuffer
+0xab1d, _QDExtensions
+0xab1e, _DisposeTempBuffer
+0xab1f, _RgnBlit
+0xab20, _RgnOp
+0xab21, _RSect
+0xab22, _SeekRgn
+0xab23, _SetFillPat
+0xab24, _SetUpStretch
+0xab25, _SlabMode
+0xab26, _SortPoints
+0xab27, _StretchBits
+0xab28, _StdDevLoop
+0xab29, _TrimRect
+0xab2a, _XorSlab
+0xab2b, _ExTblPtr
+0xab2d, _NewTempHandle
+0xab2e, _PatExTbl
+0xab30, _bMAIN0
+0xab31, _bMAIN1
+0xab32, _bMAIN2
+0xab33, _bMAIN3
+0xab34, _bSETUP8
+0xab35, _bMAIN9
+0xab36, _bSETUP10
+0xab37, _bMAIN11
+0xab38, _bXMAIN8
+0xab39, _bXMAIN9
+0xab3a, _bXMAIN10
+0xab3b, _bXMAIN11
+0xab3c, _bcMain0
+0xab3d, _bcMain1
+0xab3e, _bHilite
+0xab3f, _bcMain3
+0xab40, _bEND0
+0xab41, _bEND1
+0xab42, _bEND2
+0xab43, _bEND3
+0xab44, _bLONG8
+0xab45, _bEND9
+0xab46, _bEND10
+0xab47, _bEND11
+0xab48, _bXLONG8
+0xab49, _bXEND9
+0xab4a, _bXEND10
+0xab4b, _bXEND11
+0xab4c, _bcEnd0
+0xab4d, _bcEnd1
+0xab4e, _bSlowHilite
+0xab4f, _bcEnd
+0xab50, _bAvg
+0xab51, _bAddPin
+0xab52, _bAddOver
+0xab53, _bSubPin
+0xab54, _bTransparent
+0xab55, _bMax
+0xab56, _bSubOver
+0xab57, _bMin
+0xab58, _bSetup0
+0xab59, _bLeft0
+0xab5a, _rMASK0
+0xab5b, _rMASK1
+0xab5c, _rMASK2
+0xab5d, _rMASK3
+0xab5e, _rMASK8
+0xab5f, _rMASK9
+0xab60, _rMASK10
+0xab61, _rMASK11
+0xab62, _rXMASK8
+0xab63, _rXMASK9
+0xab64, _rXMASK10
+0xab65, _rXMASK11
+0xab66, _rAvg
+0xab67, _rAddPin
+0xab68, _rAddOver
+0xab69, _rSubPin
+0xab6a, _rTransparent
+0xab6b, _rMax
+0xab6c, _rSubOver
+0xab6d, _rMin
+0xab6e, _rcMask0
+0xab6f, _rcMask1
+0xab70, _rSlowHilite
+0xab71, _rcMask3
+0xab72, _rHilite
+0xab73, _stMASK0
+0xab74, _stMASK1
+0xab75, _stMASK2
+0xab76, _stMASK3
+0xab77, _stAvg
+0xab78, _stAddPin
+0xab79, _stAddOver
+0xab7a, _stSubPin
+0xab7b, _stTransparent
+0xab7c, _stMax
+0xab7d, _stSubOver
+0xab7e, _stMin
+0xab7f, _stHilite
+0xab80, _slMASK8
+0xab81, _slMASK9
+0xab82, _slMASK10
+0xab83, _slMASK11
+0xab84, _slXMASK8
+0xab85, _slXMASK9
+0xab86, _slXMASK10
+0xab87, _slXMASK11
+0xab88, _slAvg
+0xab89, _slAddPin
+0xab8a, _slAddOver
+0xab8b, _slSubPin
+0xab8c, _slTransparent
+0xab8d, _slMax
+0xab8e, _slSubOver
+0xab8f, _slMin
+0xab90, _slHilite
+0xab91, _ITabMatch
+0xab92, _ColorThing
+0xab93, _Pollack
+0xab94, _AllocRunBuf
+0xab95, _InitRgn
+0xab96, _ScaleBlt
+0xab97, _stNoStack
+0xab98, _BlitCase
+0xab99, _stScanLoop
+0xab9a, _PicItem1
+0xab9b, _MakeGrayITab
+0xab9c, _FastLine
+0xab9d, _FastSlant
+0xab9e, _BitsDevLoop
+0xaba0, _rArith16Tab
+0xaba1, _rArith32Tab
+0xaba2, _rHiliteTab
+0xaba3, _gsRunTbl
+0xaba4, _gsExpTbl
+0xaba5, _gsSeekTbl
+0xaba6, _stArith16Tab
+0xaba7, _stArith32Tab
+0xaba8, _stColorTab
+0xaba9, _stGrayTab
+0xabaa, _stSearchTab
+0xabab, _ScaleIndToInd
+0xabac, _scIndTab1
+0xabad, _scIndTab2
+0xabae, _scIndTab4
+0xabaf, _scIndTab8
+0xabb0, _scIndTab16
+0xabb1, _scIndTab32
+0xabb2, _scDirTab1
+0xabb3, _scDirTab2
+0xabb4, _scDirTab4
+0xabb5, _scDirTab8
+0xabb6, _scDirTab16
+0xabb7, _scDirTab32
+0xabb8, _bArith16Tab
+0xabb9, _bArith32Tab
+0xabba, _bHiliteTab
+0xabbb, _bArith16Setup
+0xabbc, _bArith32Setup
+0xabbd, _slArith16Tab
+0xabbe, _slArith32Tab
+0xabbf, _32QD
+0xabc0, _QDAlphaDispatch
+0xabc1, _QDStreamToMask
+0xabc2, _QTMatrixMathDispatch
+0xabc3, _NQDMisc
+0xabc4, _GetPMData
+0xabc5, _32QD
+0xabc6, _32QD
+0xabc7, _32QD
+0xabc8, _StdOpcodeProc
+0xabc9, _IconDispatch
+0xabca, _DeviceLoop, pascal, void, pointer drawingRgn, pointer drawingProc, dword userData, dword flags
+0xabcc, _PBBlockMove
+0xabcd, _SnappingTurk
+0xabce, _UnicodeMgr
+0xabcf, _ProcessMgr
+0xabea, _ModemMgr
+0xabeb, _DisplayDispatch
+0xabec, _ButtonMgr
+0xabed, _DragDispatch
+0xabee, _ColorSync
+0xabef, _TTSMgr
+0xabf0, _AROSE
+0xabf1, _GestaltValueDispatch
+0xabf2, _ThreadDispatch
+0xabf3, _EddyTrap
+0xabf4, _XTNDMgr
+0xabf5, _DSPManager
+0xabf6, _CollectionMgr
+0xabf7, _SynchIdleTime
+0xabf8, _StdOpcodeProc
+0xabf9, _AUXDispatch
+0xabfa, _AUXSysCall
+0xabfb, _MessageMgr
+0xabfc, _TranslationDispatch
+0xabfd, _TouchStone
+0xabfe, _GXPrinting
+0xabff, _DebugStr, pascal, void, pointer aStr

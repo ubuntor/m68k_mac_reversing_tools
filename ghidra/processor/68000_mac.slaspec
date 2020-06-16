@@ -1,0 +1,3 @@
+@include "68000.sinc"
+define pcodeop syscall;
+:syscall "#"op015 is op=0xa & op015 { syscall(); }
