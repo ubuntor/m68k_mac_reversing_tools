@@ -20,4 +20,5 @@
 2. Put the files in [ghidra/processor](ghidra/processor) in `$GHIDRA_INSTALL/Ghidra/Processors/68000/data/languages/`.
 3. Put []() in `$GHIDRA_INSTALL/Ghidra/Features/Base/data/`.
 4. Add the scripts in [ghidra/scripts](ghidra/scripts) to Ghidra scripts. These will be in the `Analysis/M68k` category.
-5. Open the dump, then run `M68kMacJankLoader.java` (find functions from jumptable), `M68kMacSymbols.java` (find symbols), and `M68kMacSyscallScript.java` (markup syscalls) in that order.
+5. Open the dump as processor `68000`, variant `Mac`.
+6. Run `M68kMacJankLoader.java` (find functions from jumptable), `M68kMacSymbols.java` (find symbols), and `M68kMacSyscallScript.java` (markup syscalls) in that order.
