@@ -11,23 +11,23 @@ import ghidra.program.model.symbol.*;
 
 public class M68kMacSymbols extends GhidraScript {
 
-	private static final byte[][] ENDINGS = {
+    private static final byte[][] ENDINGS = {
         { (byte) 0x4e, (byte) 0x75 }, // rts
         { (byte) 0x4e, (byte) 0xd0 }, // jmp (A0)
         { (byte) 0x4e, (byte) 0x74 }  // rtd
     };
 
-	@Override
-	protected void run() throws Exception {
-		if (!currentProgram.getLanguage().getProcessor().toString().equals("68000")) {
+    @Override
+    protected void run() throws Exception {
+        if (!currentProgram.getLanguage().getProcessor().toString().equals("68000")) {
             printf("Processor: %s", currentProgram.getLanguage().getProcessor().toString());
-			popup("Processor must be 68000");
-			return;
-		}
+            popup("Processor must be 68000");
+            return;
+        }
 
         // get symbol as described in MacsBug Reference and Debugging Guide, Appendix D (Procedure Names)
-		for (Function func : currentProgram.getFunctionManager().getFunctionsNoStubs(true)) {
-			for (Instruction inst : currentProgram.getListing().getInstructions(func.getBody(), true)) {
+        for (Function func : currentProgram.getFunctionManager().getFunctionsNoStubs(true)) {
+            for (Instruction inst : currentProgram.getListing().getInstructions(func.getBody(), true)) {
                 for (byte[] ending : ENDINGS) {
                     if (Arrays.equals(ending, inst.getBytes())) {
                         Address symbolAddr = inst.getAddress().addNoWrap(2);
@@ -42,7 +42,7 @@ public class M68kMacSymbols extends GhidraScript {
                             // TODO: fixed length symbols?
                             break;
                         }
-			            byte[] symbolBytes = getBytes(symbolAddr, length);
+                        byte[] symbolBytes = getBytes(symbolAddr, length);
                         if (length > 0) {
                             boolean goodSymbol = true;
                             for (byte b : symbolBytes) {
@@ -59,7 +59,7 @@ public class M68kMacSymbols extends GhidraScript {
                         }
                     }
                 }
-			}
-		}
-	}
+            }
+        }
+    }
 }

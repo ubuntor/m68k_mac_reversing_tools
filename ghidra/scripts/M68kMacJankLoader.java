@@ -8,34 +8,44 @@ import ghidra.app.script.GhidraScript;
 import ghidra.framework.Application;
 import ghidra.program.model.address.*;
 import ghidra.program.model.listing.*;
+import ghidra.program.model.mem.MemoryAccessException;
 import ghidra.program.model.symbol.*;
 
 public class M68kMacJankLoader extends GhidraScript {
 
-	private static final byte[] JMP = { (byte) 0x4e, (byte) 0xf9 };
+    private static final byte[] JMP = { (byte) 0x4e, (byte) 0xf9 };
+    private static final int DUMMY_ADDR = 0xFFFFFFFF;
 
-	@Override
-	protected void run() throws Exception {
-		if (!currentProgram.getLanguage().getProcessor().toString().equals("68000")) {
+    @Override
+    protected void run() throws Exception {
+        if (!currentProgram.getLanguage().getProcessor().toString().equals("68000")) {
             printf("Processor: %s", currentProgram.getLanguage().getProcessor().toString());
-			popup("Processor must be 68000");
-			return;
-		}
+            popup("Processor must be 68000");
+            return;
+        }
 
         Address a5 = toAddr(getInt(toAddr(0x904)));
 
         Address jumptable_entry = a5.addNoWrap(0x20);
-        while (true) {
-            Address thunkAddr = jumptable_entry.addNoWrap(2);
-            if (!Arrays.equals(getBytes(thunkAddr, 2), JMP)) {
-                break;
+        // TODO: actually check the addresses
+        try {
+            while (true) {
+                Address thunkAddr = jumptable_entry.addNoWrap(2);
+                if (!Arrays.equals(getBytes(thunkAddr, 2), JMP)) {
+                    break;
+                }
+                int funcAddrInt = getInt(jumptable_entry.addNoWrap(4));
+                if (funcAddrInt == DUMMY_ADDR) {
+                    continue;
+                }
+                Address funcAddr = toAddr(funcAddrInt);
+                disassemble(funcAddr);
+                createFunction(funcAddr, null);
+                disassemble(thunkAddr);
+                createFunction(thunkAddr, null);
+                jumptable_entry = jumptable_entry.addNoWrap(8);
             }
-            Address funcAddr = toAddr(getInt(jumptable_entry.addNoWrap(4)));
-            disassemble(funcAddr);
-            createFunction(funcAddr, null);
-            disassemble(thunkAddr);
-            createFunction(thunkAddr, null);
-            jumptable_entry = jumptable_entry.addNoWrap(8);
+        } catch (MemoryAccessException|AddressOverflowException e) {
         }
 
         // first entry in jumptable is entry point
@@ -43,10 +53,10 @@ public class M68kMacJankLoader extends GhidraScript {
 
         // set value of a5 for the whole program
         AddressSpace space = currentProgram.getAddressFactory().getDefaultAddressSpace();
-		SetRegisterCmd cmd = new SetRegisterCmd(currentProgram.getLanguage().getRegister("A5"),
+        SetRegisterCmd cmd = new SetRegisterCmd(currentProgram.getLanguage().getRegister("A5"),
             space.getMinAddress(),
             space.getMaxAddress(),
-			a5.getOffsetAsBigInteger());
-		cmd.applyTo(currentProgram);
-	}
+            a5.getOffsetAsBigInteger());
+        cmd.applyTo(currentProgram);
+    }
 }
