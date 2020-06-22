@@ -11,6 +11,8 @@ DUMMY_ADDR = 0xFFFFFFFF
 # m68k is big endian
 def u16(x):
     return struct.unpack('>H', x)[0]
+def u16s(x):
+    return struct.unpack('>h', x)[0]
 def u32(x):
     return struct.unpack('>I', x)[0]
 def p16(x):
@@ -157,20 +159,25 @@ def dump_file(image_filename, path, out_filename):
                     zero_index += 2
             # TODO refactor
             drel_rsrc = bytes(rsrcs[b'DREL'][0])
-            for i in range(0, len(drel_rsrc), 2):
-                addr = u16(drel_rsrc[i:i+2])
+            i = 0
+            while i < len(drel_rsrc):
+                addr = u16s(drel_rsrc[i:i+2])
+                if addr >= 0:
+                    i += 2
+                    addr = -u16(drel_rsrc[i:i+2])
                 if addr & 0x1:
                     print("STRS patch ", end='')
                     base = strs_base
-                    addr = addr & 0xFFFE
+                    addr = u16_to_s16(addr & 0xFFFE)
                 else:
                     print("A5 patch ", end='')
                     base = a5
-                addr = u16_to_s16(addr) + below_a5_size # DREL relative to a5
+                addr += below_a5_size # DREL relative to a5
                 data = u32(below_a5_data[addr:addr+4])
                 data2 = (data + base) & 0xFFFFFFFF
                 below_a5_data[addr:addr+4] = p32(data2)
                 print('data addr {:04x} ({:08x} -> {:08x})'.format(addr, data, data2))
+                i += 2
             below_a5_data = bytes(below_a5_data)
 
     dump += below_a5_data
