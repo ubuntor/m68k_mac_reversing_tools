@@ -3,6 +3,7 @@
 
 import java.io.*;
 import java.util.*;
+import generic.jar.ResourceFile;
 import ghidra.app.cmd.register.SetRegisterCmd;
 import ghidra.app.script.GhidraScript;
 import ghidra.framework.Application;
@@ -24,7 +25,21 @@ public class M68kMacJankLoader extends GhidraScript {
             return;
         }
 
-        Address a5 = toAddr(getInt(toAddr(0x904)));
+        ResourceFile rFile = Application.findDataFileInAnyModule("m68k_mac_system_globals");
+        if (rFile == null) {
+            popup("Could not find system globals file");
+            return;
+        }
+        BufferedReader br = new BufferedReader(new FileReader(rFile.getFile(false)));
+        String line = null;
+        while ((line = br.readLine()) != null) {
+            String[] parts = line.trim().split(",", 2);
+            Address addr = toAddr(Long.decode(parts[0].trim()));
+            String name = parts[1].trim();
+            createLabel(addr, name, true, SourceType.ANALYSIS);
+        }
+
+        Address a5 = toAddr(getInt(toAddr(0x904))); // CurrentA5
 
         Address jumptable_entry = a5.addNoWrap(0x20);
         // TODO: actually check the addresses
