@@ -17,6 +17,10 @@ def p16(x):
     return struct.pack('>H', x)
 def p32(x):
     return struct.pack('>I', x)
+def u16_to_s16(x):
+    if x & 0x8000:
+        x -= 0x10000
+    return x
 
 def dump_file(image_filename, path, out_filename):
     print("dumping {} to {}".format('/'.join([image_filename]+path), out_filename))
@@ -102,7 +106,7 @@ def dump_file(image_filename, path, out_filename):
         print()
         # Think C (Symantec) relocations
         if needs_relocations and jumptable_entry_num > 0:
-            # TODO: also do this for DATA and DREL
+            # TODO: refactor
             for j in range(0, len(crels[i]), 2):
                 addr = u16(crels[i][j:j+2]) - 4 # -4 from header
                 if addr & 0x1:
@@ -134,7 +138,42 @@ def dump_file(image_filename, path, out_filename):
         a5_world += b'\x4e\xf9' # jmp
         a5_world += p32(addr)
 
-    dump += bytes(below_a5_size)
+    below_a5_data = bytes(below_a5_size)
+
+    if b'ZERO' in rsrcs and b'DATA' in rsrcs:
+        data_rsrc = bytes(rsrcs[b'DATA'][0])
+        zero_rsrc = bytes(rsrcs[b'ZERO'][0])
+        total_data_size = len(data_rsrc)
+        for i in range(0, len(zero_rsrc), 2):
+            total_data_size += u16(zero_rsrc[i:i+2])
+        if total_data_size == below_a5_size:
+            print("Adding DATA to A5 world", hex(below_a5_size))
+            below_a5_data = bytearray()
+            zero_index = 0
+            for i in range(0, len(data_rsrc), 2):
+                below_a5_data += data_rsrc[i:i+2]
+                if u16(data_rsrc[i:i+2]) == 0:
+                    below_a5_data += bytes(u16(zero_rsrc[zero_index:zero_index+2]))
+                    zero_index += 2
+            # TODO refactor
+            drel_rsrc = bytes(rsrcs[b'DREL'][0])
+            for i in range(0, len(drel_rsrc), 2):
+                addr = u16(drel_rsrc[i:i+2])
+                if addr & 0x1:
+                    print("STRS patch ", end='')
+                    base = strs_base
+                    addr = addr & 0xFFFE
+                else:
+                    print("A5 patch ", end='')
+                    base = a5
+                addr = u16_to_s16(addr) + below_a5_size # DREL relative to a5
+                data = u32(below_a5_data[addr:addr+4])
+                data2 = (data + base) & 0xFFFFFFFF
+                below_a5_data[addr:addr+4] = p32(data2)
+                print('data addr {:04x} ({:08x} -> {:08x})'.format(addr, data, data2))
+            below_a5_data = bytes(below_a5_data)
+
+    dump += below_a5_data
     assert len(dump) == a5
     dump += a5_world
 
