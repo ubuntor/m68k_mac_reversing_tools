@@ -148,8 +148,8 @@ def dump_file(image_filename, path, out_filename):
         total_data_size = len(data_rsrc)
         for i in range(0, len(zero_rsrc), 2):
             total_data_size += u16(zero_rsrc[i:i+2])
-        if total_data_size == below_a5_size:
-            print("Adding DATA to A5 world", hex(below_a5_size))
+        if total_data_size <= below_a5_size:
+            print("Adding DATA below A5 world")
             below_a5_data = bytearray()
             zero_index = 0
             for i in range(0, len(data_rsrc), 2):
@@ -178,7 +178,7 @@ def dump_file(image_filename, path, out_filename):
                 below_a5_data[addr:addr+4] = p32(data2)
                 print('data addr {:04x} ({:08x} -> {:08x})'.format(addr, data, data2))
                 i += 2
-            below_a5_data = bytes(below_a5_data)
+            below_a5_data = bytes(below_a5_data) + bytes(below_a5_size - total_data_size)
 
     dump += below_a5_data
     assert len(dump) == a5
