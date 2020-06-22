@@ -25,7 +25,6 @@
 
 ## TODO
 * `_FP68K` (and `_*Dispatch`, `_Pack*`, etc.) routine number labelling
-* Label system global vars (see Mac Almanac II)
 * Finish all syscalls
 * Figure out ghidra issue
 * Direct loader for Ghidra from binhex/derez

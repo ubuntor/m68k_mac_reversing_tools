@@ -5,6 +5,15 @@ import os
 from .syscalls import FP68K_TYPES, FP68K_OPS
 from binaryninja.log import log_error
 
+SYSTEM_GLOBALS = {}
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+with open(os.path.join(__location__, "m68k_mac_system_globals"),"r") as f:
+    for line in f:
+        if line.startswith('#'):
+            continue
+        l = [i.strip() for i in line.split(",")]
+        SYSTEM_GLOBALS[int(l[0],0)] = l[1]
+
 # symbol scanning from:
 # MacsBug Reference and Debugging Guide, Appendix D (Procedure Names)
 SYMBOL_CHARS = set(map(ord, string.ascii_letters + string.digits + '_%. '))
@@ -70,6 +79,10 @@ class MacClassicView(BinaryView):
                               SegmentFlag.SegmentWritable |
                               SegmentFlag.SegmentExecutable)
         self.add_function(8) # fake function that sets value of a5
+
+        for addr in SYSTEM_GLOBALS:
+            self.define_auto_symbol(Symbol(SymbolType.DataSymbol, addr, SYSTEM_GLOBALS[addr]))
+
         self.define_auto_symbol(Symbol(SymbolType.FunctionSymbol, 8, "__fake_set_a5"))
         a5 = u32(self.read(0x904, 4))
         self.add_analysis_completion_event(on_complete)
