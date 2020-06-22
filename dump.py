@@ -59,6 +59,8 @@ def dump_file(image_filename, path, out_filename):
         if i == 0:
             continue
         a5 += len(codes[i])-4
+    if b'STRS' in rsrcs:
+        a5 += len(rsrcs[b'STRS'][0])
 
     dump = b''
     header = b'J\xffA\xffN\xffK\xff' # put garbage so address 0 isn't recognized as a string
@@ -70,6 +72,10 @@ def dump_file(image_filename, path, out_filename):
     system_ram = bytearray(header + bytes(SYSTEM_RAM_SIZE - len(header)))
     system_ram[0x904:0x908] = p32(a5)
     dump += system_ram
+
+    if b'STRS' in rsrcs:
+        strs_base = len(dump)
+        dump += rsrcs[b'STRS'][0]
 
     segment_bases = {}
     for i in codes:
@@ -94,18 +100,22 @@ def dump_file(image_filename, path, out_filename):
         if far_header:
             print(", far",end='')
         print()
-        # relocations as seen in Heaven & Earth (maybe a common compiler?)
+        # Think C (Symantec) relocations
         if needs_relocations and jumptable_entry_num > 0:
+            # TODO: also do this for DATA and DREL
             for j in range(0, len(crels[i]), 2):
                 addr = u16(crels[i][j:j+2]) - 4 # -4 from header
-                data = u32(segment_data[addr:addr+4])
                 if addr & 0x1:
-                    print("TODO: string patch addr {:04x}".format(addr))
-                    1/0
+                    print("STRS patch ", end='')
+                    base = strs_base
                     addr = addr & 0xFFFE
-                data2 = (data + a5) & 0xFFFFFFFF
+                else:
+                    print("A5 patch ", end='')
+                    base = a5
+                data = u32(segment_data[addr:addr+4])
+                data2 = (data + base) & 0xFFFFFFFF
                 segment_data[addr:addr+4] = p32(data2)
-                print('patched seg {} addr {:04x} ({:08x} -> {:08x})'.format(i, addr, data, data2))
+                print('seg {} addr {:04x} ({:08x} -> {:08x})'.format(i, addr, data, data2))
         dump += bytes(segment_data)
 
     # construct a5 world

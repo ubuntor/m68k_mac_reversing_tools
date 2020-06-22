@@ -73,7 +73,7 @@
 0xa03d, _DrvrInstall
 0xa03e, _DrvrRemove
 0xa03f, _InitUtil
-0xa040, _ResrvMem
+0xa040, _ResrvMem, custom, dword @ D0, dword cbNeeded @ D0
 0xa041, _SetFilLock
 0xa042, _RstFilLock
 0xa043, _SetFilType
