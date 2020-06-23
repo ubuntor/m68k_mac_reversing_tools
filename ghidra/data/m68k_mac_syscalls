@@ -148,7 +148,7 @@
 0xa08d, _DebugUtil
 0xa08e, _BTreeDispatch
 0xa08f, _DeferUserFn
-0xa090, _SysEnvirons
+0xa090, _SysEnvirons, custom, word @ D0w, word versionRequested @ D0w, pointer theWorld @ A0
 0xa091, _Translate24To32
 0xa092, _EgretDispatch
 0xa093, _Microseconds
@@ -333,8 +333,8 @@
 0xa800, _SoundDispatch
 0xa801, _SndDisposeChannel, pascal, out2, pointer chan, byte quietNow
 0xa802, _SndAddModifier, pascal, out2, pointer chan, pointer modifier, word id, dword init
-0xa803, _SndDoCommand
-0xa804, _SndDoImmediate
+0xa803, _SndDoCommand, pascal, out2, pointer chan, pointer cmd, byte noWait
+0xa804, _SndDoImmediate, pascal, out2, pointer chan, pointer cmd
 0xa805, _SndPlay, pascal, out2, pointer chan, pointer sndHdl, byte async
 0xa806, _SndControl, pascal, out2, word id, pointer cmd
 0xa807, _SndNewChannel, pascal, out2, pointer chan, word synth, dword init, pointer userRoutine

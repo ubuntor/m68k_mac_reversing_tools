@@ -40,6 +40,7 @@ types = {
     'FMetricRec': 'pointer',
     'Extended': 'pointer',
     'PScrapStuff': 'pointer',
+    'SndCommand': 'pointer',
 }
 
 sizes = {
