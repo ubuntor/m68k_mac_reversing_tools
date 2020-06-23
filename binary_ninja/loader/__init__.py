@@ -22,6 +22,7 @@ b'\x4e\x75', # rts
 b'\x4e\xd0', # jmp (A0)
 b'\x4e\x74'  # rtd
 ])
+THINK_C_START = b'\x42\x78\x0a\x4a\x9d\xce'
 
 # m68k is big endian
 def u16(x):
@@ -96,15 +97,24 @@ class MacClassicView(BinaryView):
                 break
             self.add_function(addr)
             jmptable_addr += 8
-        self.add_entry_point(u32(self.read(a5+32+4, 4)))
+        start = u32(self.read(a5+32+4, 4))
+        self.define_auto_symbol(Symbol(SymbolType.FunctionSymbol, start, "_start"))
+        if self.read(start, len(THINK_C_START)) == THINK_C_START:
+            # Think C (Symantec): main offset stored before start
+            main_jumptable_offset = u32(self.read(start-4, 4))
+            entry_point = u32(self.read(a5+main_jumptable_offset+2, 4)) # skip jmp, get addr
+            self.define_auto_symbol(Symbol(SymbolType.FunctionSymbol, entry_point, "main"))
+        else:
+            entry_point = start
+        self.store_metadata("entry_point", entry_point)
+        self.add_entry_point(entry_point)
         return True
 
     def perform_is_executable(self):
         return True
 
     def perform_get_entry_point(self):
-        a5 = u32(self.read(0x904, 4))
-        return u32(self.read(a5+32+4, 4))
+        return self.query_metadata("entry_point")
 
 MacClassicView.register()
 
