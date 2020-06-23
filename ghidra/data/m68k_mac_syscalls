@@ -42,7 +42,7 @@
 0xa018, _GetFPos, custom, word @ D0w, pointer paramBlock @ A0
 0xa019, _InitZone
 0xa01b, _SetZone
-0xa01c, _FreeMem
+0xa01c, _FreeMem, custom, dword @ D0
 0xa01f, _DisposePtr, custom, dword @ D0, pointer ptr @ A0
 0xa020, _SetPtrSize
 0xa021, _GetPtrSize

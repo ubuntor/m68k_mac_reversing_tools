@@ -2,7 +2,6 @@ from binaryninja import *
 import struct
 import string
 import os
-from .syscalls import FP68K_TYPES, FP68K_OPS
 from binaryninja.log import log_error
 
 SYSTEM_GLOBALS = {}

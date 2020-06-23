@@ -1,117 +1,92 @@
-# selector number, name, # of operands
+# selector number, name, comment, # of operands
 # from "68000 SANE Engine" in "Lisa Pascal 3.0 Systems Software"
-# add
-0x0000, FADDX, 2
-0x0800, FADDD, 2
-0x1000, FADDS, 2
-0x3000, FADDC, 2
-0x2000, FADDI, 2
-0x2800, FADDL, 2
-# subtract
-0x0002, FSUBX, 2
-0x0802, FSUBD, 2
-0x1002, FSUBS, 2
-0x3002, FSUBC, 2
-0x2002, FSUBI, 2
-0x2802, FSUBL, 2
-# multiply
-0x0004, FMULX, 2
-0x0804, FMULD, 2
-0x1004, FMULS, 2
-0x3004, FMULC, 2
-0x2004, FMULI, 2
-0x2804, FMULL, 2
-# divide
-0x0006, FDIVX, 2
-0x0806, FDIVD, 2
-0x1006, FDIVS, 2
-0x3006, FDIVC, 2
-0x2006, FDIVI, 2
-0x2806, FDIVL, 2
-# square root
-0x0012, FSQRTX, 1
-# round to int
-0x0014, FRINTX, 1
-# trunc to int
-0x0016, FTINTX, 1
-# remainder: also stores quotient in d0
-0x000c, FREMX, 2
-0x080c, FREMD, 2
-0x100c, FREMS, 2
-0x300c, FREMC, 2
-0x200c, FREMI, 2
-0x280c, FREML, 2
-# log binary
-0x001a, FLOGBX, 1
-# scale binary
-0x0018, FSCALBX, 2
-# negate
-0x000d, FNEGX, 1
-# absolute value
-0x000f, FABSX, 1
-# copy-sign
-0x0011, FCPYSGNX, 2
-# next-after
-0x0013, FNEXTX, 2
-0x0813, FNEXTD, 2
-0x1013, FNEXTS, 2
-# convert bin to bin
-0x0010, FX2X, 2
-0x0810, FX2D, 2
-0x1010, FX2S, 2
-0x3010, FX2C, 2
-0x2010, FX2I, 2
-0x2810, FX2L, 2
-0x080e, FD2X, 2
-0x100e, FS2X, 2
-0x300e, FC2X, 2
-0x200e, FI2X, 2
-0x280e, FL2X, 2
-# convert bin to dec
-0x000b, FX2DEC, 3
-0x080b, FD2DEC, 3
-0x100b, FS2DEC, 3
-0x300b, FC2DEC, 3
-0x200b, FI2DEC, 3
-0x280b, FL2DEC, 3
-# convert dec to bin
-0x0009, FDEC2X, 2
-0x0809, FDEC2D, 2
-0x1009, FDEC2S, 2
-0x3009, FDEC2C, 2
-0x2009, FDEC2I, 2
-0x2809, FDEC2L, 2
-# compare (no invalid for unordered): sets flags
-0x0008, FCMPX, 2
-0x0808, FCMPD, 2
-0x1008, FCMPS, 2
-0x3008, FCMPC, 2
-0x2008, FCMPI, 2
-0x2808, FCMPL, 2
-# compare (signal invalid if unordered): sets flags
-0x000a, FCPXX, 2
-0x080a, FCPXD, 2
-0x100a, FCPXS, 2
-0x300a, FCPXC, 2
-0x200a, FCPXI, 2
-0x280a, FCPXL, 2
-# classify
-0x001c, FCLASSX, 2
-0x081c, FCLASSD, 2
-0x101c, FCLASSS, 2
-# get environment
-0x0003, FGETENV, 1
-# set environment
-0x0001, FSETENV, 1
-# test exception
-0x001b, FTESTXCP, 1
-# set exception
-0x0015, FSETXCP, 1
-# procedure entry
-0x0017, FPROCENTRY, 1
-# procedure exit
-0x0019, FPROCEXIT, 1
-# set halt vector
-0x0005, FSETHV, 1
-# get halt vector
-0x0007, FGETHV, 1
+# TODO: return, param types
+0x0000, FADDX, add extended, 2
+0x0800, FADDD, add double, 2
+0x1000, FADDS, add single, 2
+0x3000, FADDC, add comp, 2
+0x2000, FADDI, add int, 2
+0x2800, FADDL, add long, 2
+0x0002, FSUBX, sub extended, 2
+0x0802, FSUBD, sub double, 2
+0x1002, FSUBS, sub single, 2
+0x3002, FSUBC, sub comp, 2
+0x2002, FSUBI, sub int, 2
+0x2802, FSUBL, sub long, 2
+0x0004, FMULX, mul extended, 2
+0x0804, FMULD, mul double, 2
+0x1004, FMULS, mul single, 2
+0x3004, FMULC, mul comp, 2
+0x2004, FMULI, mul int, 2
+0x2804, FMULL, mul long, 2
+0x0006, FDIVX, div extended, 2
+0x0806, FDIVD, div double, 2
+0x1006, FDIVS, div single, 2
+0x3006, FDIVC, div comp, 2
+0x2006, FDIVI, div int, 2
+0x2806, FDIVL, div long, 2
+0x0012, FSQRTX, sqrt extended, 1
+0x0014, FRINTX, round extended to int, 1
+0x0016, FTINTX, trunc extended to int, 1
+# TODO: rem stores quotient in d0
+0x000c, FREMX, rem extended, 2
+0x080c, FREMD, rem double, 2
+0x100c, FREMS, rem single, 2
+0x300c, FREMC, rem comp, 2
+0x200c, FREMI, rem int, 2
+0x280c, FREML, rem long, 2
+0x001a, FLOGBX, log binary extended, 1
+0x0018, FSCALBX, scale binary extended, 2
+0x000d, FNEGX, negate extended, 1
+0x000f, FABSX, abs extended, 1
+0x0011, FCPYSGNX, copy-sign extended, 2
+0x0013, FNEXTX, next-after extended, 2
+0x0813, FNEXTD, next-after double, 2
+0x1013, FNEXTS, next-after single, 2
+0x0010, FX2X, extended to extended, 2
+0x0810, FX2D, extended to double, 2
+0x1010, FX2S, extended to single, 2
+0x3010, FX2C, extended to comp, 2
+0x2010, FX2I, extended to int, 2
+0x2810, FX2L, extended to long, 2
+0x080e, FD2X, double to extended, 2
+0x100e, FS2X, single to extended, 2
+0x300e, FC2X, comp to extended, 2
+0x200e, FI2X, int to extended, 2
+0x280e, FL2X, long to extended, 2
+0x000b, FX2DEC, extended to decimal, 3
+0x080b, FD2DEC, double to decimal, 3
+0x100b, FS2DEC, single to decimal, 3
+0x300b, FC2DEC, comp to decimal, 3
+0x200b, FI2DEC, int to decimal, 3
+0x280b, FL2DEC, long to decimal, 3
+0x0009, FDEC2X, decimal to extended, 2
+0x0809, FDEC2D, decimal to double, 2
+0x1009, FDEC2S, decimal to single, 2
+0x3009, FDEC2C, decimal to comp, 2
+0x2009, FDEC2I, decimal to int, 2
+0x2809, FDEC2L, decimal to long, 2
+# TODO: compare sets flags
+0x0008, FCMPX, compare extended (no invalid for unordered), 2
+0x0808, FCMPD, compare double (no invalid for unordered), 2
+0x1008, FCMPS, compare single (no invalid for unordered), 2
+0x3008, FCMPC, compare comp (no invalid for unordered), 2
+0x2008, FCMPI, compare int (no invalid for unordered), 2
+0x2808, FCMPL, compare long (no invalid for unordered), 2
+0x000a, FCPXX, compare extended (signal invalid if unordered), 2
+0x080a, FCPXD, compare double (signal invalid if unordered), 2
+0x100a, FCPXS, compare single (signal invalid if unordered), 2
+0x300a, FCPXC, compare comp (signal invalid if unordered), 2
+0x200a, FCPXI, compare int (signal invalid if unordered), 2
+0x280a, FCPXL, compare long (signal invalid if unordered), 2
+0x001c, FCLASSX, classify extended, 2
+0x081c, FCLASSD, classify double, 2
+0x101c, FCLASSS, classify single, 2
+0x0003, FGETENV, get environment, 1
+0x0001, FSETENV, set environment, 1
+0x001b, FTESTXCP, test exception, 1
+0x0015, FSETXCP, set exception, 1
+0x0017, FPROCENTRY, procedure entry, 1
+0x0019, FPROCEXIT, procedure exit, 1
+0x0005, FSETHV, set halt vector, 1
+0x0007, FGETHV, get halt vector, 1
