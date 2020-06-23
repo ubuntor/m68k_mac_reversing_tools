@@ -15,6 +15,9 @@ import ghidra.program.model.symbol.*;
 public class M68kMacJankLoader extends GhidraScript {
 
     private static final byte[] JMP = { (byte) 0x4e, (byte) 0xf9 };
+    private static final byte[] THINK_C_START = {
+        (byte) 0x42, (byte) 0x78, (byte) 0x0a, (byte) 0x4a, (byte) 0x9d, (byte) 0xce
+    };
     private static final int DUMMY_ADDR = 0xFFFFFFFF;
 
     @Override
@@ -64,7 +67,19 @@ public class M68kMacJankLoader extends GhidraScript {
         }
 
         // first entry in jumptable is entry point
-        addEntryPoint(toAddr(getInt(a5.addNoWrap(0x20+4))));
+        Address startAddr = toAddr(getInt(a5.addNoWrap(0x20+4)));
+        createLabel(startAddr, "_start", false, SourceType.ANALYSIS);
+        if (Arrays.equals(getBytes(startAddr, THINK_C_START.length), THINK_C_START)) {
+            printf("Detected Think C, finding main\n");
+            // Think C (Symantec): main offset stored before start
+            int mainJumptableOffset = getInt(startAddr.addNoWrap(-4));
+            Address entryPoint = toAddr(getInt(a5.addNoWrap(mainJumptableOffset+2))); // skip jmp, get addr
+            printf("found main at %s\n", entryPoint);
+            addEntryPoint(entryPoint);
+            createLabel(entryPoint, "main", false, SourceType.ANALYSIS);
+        } else {
+            addEntryPoint(startAddr);
+        }
 
         // set value of a5 for the whole program
         AddressSpace space = currentProgram.getAddressFactory().getDefaultAddressSpace();
