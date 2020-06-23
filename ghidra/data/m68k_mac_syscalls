@@ -313,13 +313,13 @@
 0xa746, _GetToolTrapAddress, custom, pointer @ A0, word trapNum @ D0w
 0xa7ad, _GetGestaltProcPtr
 0xa800, _SoundDispatch
-0xa801, _SndDisposeChannel
-0xa802, _SndAddModifier
+0xa801, _SndDisposeChannel, pascal, out2, pointer chan, byte quietNow
+0xa802, _SndAddModifier, pascal, out2, pointer chan, pointer modifier, word id, dword init
 0xa803, _SndDoCommand
 0xa804, _SndDoImmediate
-0xa805, _SndPlay
-0xa806, _SndControl
-0xa807, _SndNewChannel
+0xa805, _SndPlay, pascal, out2, pointer chan, pointer sndHdl, byte async
+0xa806, _SndControl, pascal, out2, word id, pointer cmd
+0xa807, _SndNewChannel, pascal, out2, pointer chan, word synth, dword init, pointer userRoutine
 0xa808, _InitProcMenu, pascal, void, word resID
 0xa809, _GetControlVariant, pascal, out2, pointer theControl
 0xa80a, _GetWVariant, pascal, out2, pointer theWindow
@@ -573,7 +573,7 @@
 0xa902, _RealFont, pascal, out1, word fontNum, word size
 0xa903, _SetFontLock, pascal, void, byte lockFlag
 0xa904, _DrawGrowIcon, pascal, void, pointer theWindow
-0xa905, _DragGrayRgn, pascal, out4, pointer theRgn, pointer startPt, pointer limitRect, pointer slopRect, word axis, pointer actionProc
+0xa905, _DragGrayRgn, pascal, out4, pointer theRgn, pointer startPt, pointer boundsRect, pointer slopRect, word axis, pointer actionProc
 0xa906, _NewString, pascal, out4, pointer theString
 0xa907, _SetString, pascal, void, pointer theString, pointer strNew
 0xa908, _ShowHide, pascal, void, pointer theWindow, byte showFlag
@@ -689,8 +689,8 @@
 0xa976, _GetKeys, pascal, void, pointer theKeys
 0xa977, _WaitMouseUp, pascal, out1
 0xa978, _UpdtDialog, pascal, void, pointer theDialog, pointer updateRgn
-0xa979, _CouldDialog
-0xa97a, _FreeDialog
+0xa979, _CouldDialog, pascal, void, word dialogID
+0xa97a, _FreeDialog, pascal, void, word dialogID
 0xa97b, _InitDialogs, pascal, void, pointer resumeProc
 0xa97c, _GetNewDialog, pascal, out4, word dialogID, pointer dStorage, pointer behind
 0xa97d, _NewDialog, pascal, out4, pointer wStorage, pointer boundsRect, pointer title, byte visible, word procID, pointer behind, byte goAwayFlag, dword refCon, pointer itmLstHndl
@@ -705,8 +705,8 @@
 0xa986, _StopAlert, pascal, out2, word alertID, pointer filterProc
 0xa987, _NoteAlert, pascal, out2, word alertID, pointer filterProc
 0xa988, _CautionAlert, pascal, out2, word alertID, pointer filterProc
-0xa989, _CouldAlert
-0xa98a, _FreeAlert
+0xa989, _CouldAlert, pascal, void, word alertID
+0xa98a, _FreeAlert, pascal, void, word alertID
 0xa98b, _ParamText, pascal, void, pointer param0, pointer param1, pointer param2, pointer param3
 0xa98c, _ErrorSound, pascal, void, pointer soundProc
 0xa98d, _GetDialogItem, pascal, void, pointer theDialog, word itemNo, pointer itemType, pointer item, pointer box
