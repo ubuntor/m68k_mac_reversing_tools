@@ -118,7 +118,6 @@ class MacClassicView(BinaryView):
 
 MacClassicView.register()
 
-'''
 # based on syscaller
 class AnnotateSyscalls(BackgroundTaskThread):
     def __init__(self, bv, functions):
@@ -131,21 +130,17 @@ class AnnotateSyscalls(BackgroundTaskThread):
             self.progress = 'Annotating syscalls... ({}/{})'.format(i, len(self.functions))
             for block in function.llil:
                 for instruction in block:
-                    if instruction.operation == LowLevelILOperation.LLIL_INTRINSIC:
+                    if instruction.operation in {LowLevelILOperation.LLIL_INTRINSIC, LowLevelILOperation.LLIL_UNIMPL}:
                         val = u16(self.bv.read(instruction.address, 2))
-                        print("found", instruction, "at", instruction.address, val)
-                        if val in SYSCALLS:
-                            if SYSCALLS[val] == 'FP68K':
-                                # TODO hack
-                                consts = function.get_constants_referenced_by(instruction.address-4)
-                                if consts == []:
-                                    consts = function.get_constants_referenced_by(instruction.address-2)
-                                val = consts[-1].value
-                                ty = FP68K_TYPES[val & 0xFFE0]
-                                op = FP68K_OPS[val & 0x001F]
-                                function.set_comment_at(instruction.address, "FP68K: {} {}".format(op, ty))
-                            else:
-                                function.set_comment_at(instruction.address, SYSCALLS[val])
+                        if val == 0xa9eb: # FP68k
+                            # TODO hack
+                            consts = function.get_constants_referenced_by(instruction.address-4)
+                            if consts == []:
+                                consts = function.get_constants_referenced_by(instruction.address-2)
+                            val = consts[-1].value
+                            ty = FP68K_TYPES[val & 0xFFE0]
+                            op = FP68K_OPS[val & 0x001F]
+                            function.set_comment_at(instruction.address, "FP68K: {} {}".format(op, ty))
 
 def annotate_function(bv, function):
     task = AnnotateSyscalls(bv, [function])
@@ -166,4 +161,3 @@ PluginCommand.register(
     "Annotate M68k Mac syscalls",
     annotate_all
 )
-'''
