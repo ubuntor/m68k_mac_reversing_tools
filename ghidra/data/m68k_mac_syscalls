@@ -32,22 +32,22 @@
 0xa00e, _UnmountVol
 0xa00f, _MountVol
 0xa010, _Allocate
-0xa011, _GetEOF
-0xa012, _SetEOF
-0xa013, _FlushVol
-0xa014, _GetVol
-0xa015, _SetVol
+0xa011, _GetEOF, custom, word @ D0w, pointer paramBlock @ A0
+0xa012, _SetEOF, custom, word @ D0w, pointer paramBlock @ A0
+0xa013, _FlushVol, custom, word @ D0w, pointer paramBlock @ A0
+0xa014, _GetVol, custom, word @ D0w, pointer paramBlock @ A0
+0xa015, _SetVol, custom, word @ D0w, pointer paramBlock @ A0
 0xa016, _FInitQueue, pascal, void
 0xa017, _Eject
 0xa018, _GetFPos
 0xa019, _InitZone
 0xa01b, _SetZone
 0xa01c, _FreeMem
-0xa01f, _DisposePtr
+0xa01f, _DisposePtr, custom, dword @ D0, pointer ptr @ A0
 0xa020, _SetPtrSize
 0xa021, _GetPtrSize
-0xa023, _DisposeHandle, custom, void, pointer handle @ A0
-0xa024, _SetHandleSize
+0xa023, _DisposeHandle, custom, dword @ D0, pointer handle @ A0
+0xa024, _SetHandleSize, custom, dword @ D0, pointer handle @ A0, dword size @ D0
 0xa025, _GetHandleSize, custom, dword @ D0, pointer handle @ A0
 0xa027, _ReallocHandle
 0xa029, _HLock, custom, void, pointer handle @ A0
@@ -59,7 +59,7 @@
 0xa02f, _PostEvent
 0xa030, _OSEventAvail
 0xa031, _GetOSEvent
-0xa032, _FlushEvents
+0xa032, _FlushEvents, custom, dword @ D0, dword mask @ D0
 0xa033, _VInstall
 0xa034, _VRemove
 0xa035, _OffLine
@@ -110,7 +110,7 @@
 0xa067, _HSetRBit, custom, void, pointer handle @ A0
 0xa068, _HClrRBit, custom, void, pointer handle @ A0
 0xa069, _HGetState, custom, byte @ D0b, pointer handle @ A0
-0xa06a, _HSetState
+0xa06a, _HSetState, custom, dword @ D0, pointer handle @ A0, byte flags @ D0b
 0xa06b, _TestManager
 0xa06c, _InitFS
 0xa06d, _InitEvents
