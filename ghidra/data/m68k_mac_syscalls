@@ -15,31 +15,31 @@
 # Calling conventions:
 #   pascal: params pushed left-to-right, callee cleanup, return value stored beyond params
 #   custom: custom storage
-0xa000, _Open
-0xa001, _Close
-0xa002, _Read
-0xa003, _Write
+0xa000, _Open, custom, word @ D0w, pointer paramBlock @ A0
+0xa001, _Close, custom, word @ D0w, pointer paramBlock @ A0
+0xa002, _Read, custom, word @ D0w, pointer paramBlock @ A0
+0xa003, _Write, custom, word @ D0w, pointer paramBlock @ A0
 0xa004, _Control
 0xa005, _Status
 0xa006, _KillIO
-0xa007, _GetVolInfo
-0xa008, _Create
-0xa009, _Delete
-0xa00a, _OpenRF
-0xa00b, _Rename
-0xa00c, _GetFileInfo
-0xa00d, _SetFileInfo
-0xa00e, _UnmountVol
-0xa00f, _MountVol
-0xa010, _Allocate
+0xa007, _GetVolInfo, custom, word @ D0w, pointer paramBlock @ A0
+0xa008, _Create, custom, word @ D0w, pointer paramBlock @ A0
+0xa009, _Delete, custom, word @ D0w, pointer paramBlock @ A0
+0xa00a, _OpenRF, custom, word @ D0w, pointer paramBlock @ A0
+0xa00b, _Rename, custom, word @ D0w, pointer paramBlock @ A0
+0xa00c, _GetFileInfo, custom, word @ D0w, pointer paramBlock @ A0
+0xa00d, _SetFileInfo, custom, word @ D0w, pointer paramBlock @ A0
+0xa00e, _UnmountVol, custom, word @ D0w, pointer paramBlock @ A0
+0xa00f, _MountVol, custom, word @ D0w, pointer paramBlock @ A0
+0xa010, _Allocate, custom, word @ D0w, pointer paramBlock @ A0
 0xa011, _GetEOF, custom, word @ D0w, pointer paramBlock @ A0
 0xa012, _SetEOF, custom, word @ D0w, pointer paramBlock @ A0
 0xa013, _FlushVol, custom, word @ D0w, pointer paramBlock @ A0
 0xa014, _GetVol, custom, word @ D0w, pointer paramBlock @ A0
 0xa015, _SetVol, custom, word @ D0w, pointer paramBlock @ A0
 0xa016, _FInitQueue, pascal, void
-0xa017, _Eject
-0xa018, _GetFPos
+0xa017, _Eject, custom, word @ D0w, pointer paramBlock @ A0
+0xa018, _GetFPos, custom, word @ D0w, pointer paramBlock @ A0
 0xa019, _InitZone
 0xa01b, _SetZone
 0xa01c, _FreeMem
@@ -295,16 +295,24 @@
 0xa322, _NewHandleClear
 0xa346, _GetOSTrapAddress, custom, pointer @ A0, word trapNum @ D0w
 0xa3ad, _NewGestalt
-0xa400, _OpenAsync
-0xa401, _CloseAsync
-0xa402, _ReadAsync
-0xa403, _WriteAsync
-0xa407, _GetVolInfoAsync
-0xa408, _CreateAsync
-0xa409, _DeleteAsync
-0xa40c, _GetFileInfoAsync
-0xa40d, _SetFileInfoAsync
+0xa400, _OpenAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa401, _CloseAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa402, _ReadAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa403, _WriteAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa407, _GetVolInfoAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa408, _CreateAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa409, _DeleteAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa40a, _OpenRFAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa40b, _RenameAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa40c, _GetFileInfoAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa40d, _SetFileInfoAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa410, _AllocateAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa411, _GetEOFAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa412, _SetEOFAsync, custom, word @ D0w, pointer paramBlock @ A0
 0xa413, _FlushVolAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa414, _GetVolAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa415, _SetVolAsync, custom, word @ D0w, pointer paramBlock @ A0
+0xa418, _GetFPosAsync, custom, word @ D0w, pointer paramBlock @ A0
 0xa43d, _DrvrInstallRsrvMem
 0xa456, _UpperText
 0xa458, _InsXTime
