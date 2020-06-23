@@ -295,6 +295,16 @@
 0xa322, _NewHandleClear
 0xa346, _GetOSTrapAddress, custom, pointer @ A0, word trapNum @ D0w
 0xa3ad, _NewGestalt
+0xa400, _OpenAsync
+0xa401, _CloseAsync
+0xa402, _ReadAsync
+0xa403, _WriteAsync
+0xa407, _GetVolInfoAsync
+0xa408, _CreateAsync
+0xa409, _DeleteAsync
+0xa40c, _GetFileInfoAsync
+0xa40d, _SetFileInfoAsync
+0xa413, _FlushVolAsync, custom, word @ D0w, pointer paramBlock @ A0
 0xa43d, _DrvrInstallRsrvMem
 0xa456, _UpperText
 0xa458, _InsXTime
