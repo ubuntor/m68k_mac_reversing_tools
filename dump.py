@@ -39,8 +39,11 @@ def dump_file(image_filename, path, out_filename):
 
     for i in rsrcs:
         print(i)
-        for j in rsrcs[i]:
-            print("    {}".format(j))
+        for j,r in rsrcs[i].items():
+            if r.name != None:
+                print("    {}: {}".format(j, r.name))
+            else:
+                print("    {}".format(j))
 
     if b'CODE' not in rsrcs:
         print("Error: no executable code?")
