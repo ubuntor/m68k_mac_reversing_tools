@@ -42,8 +42,9 @@ def scan_symbol(view, func):
             elif length > 0x80:
                 length -= 0x80
             else:
-                # TODO: fixed length symbols?
-                continue
+                # TODO: 16 byte fixed length symbols
+                j -= 1
+                length = 8
             symbol = view.read(j, length)
             if length > 0 and all(k in SYMBOL_CHARS for k in symbol):
                 view.define_auto_symbol(Symbol(SymbolType.FunctionSymbol, func.start, symbol.decode('utf8')))

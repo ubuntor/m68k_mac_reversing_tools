@@ -27,7 +27,6 @@ public class M68kMacJankLoader extends GhidraScript {
             popup("Processor must be 68000");
             return;
         }
-
         ResourceFile rFile = Application.findDataFileInAnyModule("m68k_mac_system_globals");
         if (rFile == null) {
             popup("Could not find system globals file");
@@ -41,7 +40,6 @@ public class M68kMacJankLoader extends GhidraScript {
             String name = parts[1].trim();
             createLabel(addr, name, true, SourceType.ANALYSIS);
         }
-
         Address a5 = toAddr(getInt(toAddr(0x904))); // CurrentA5
 
         Address jumptable_entry = a5.addNoWrap(0x20);
@@ -54,6 +52,7 @@ public class M68kMacJankLoader extends GhidraScript {
                 }
                 int funcAddrInt = getInt(jumptable_entry.addNoWrap(4));
                 if (funcAddrInt == DUMMY_ADDR) {
+                    jumptable_entry = jumptable_entry.addNoWrap(8);
                     continue;
                 }
                 Address funcAddr = toAddr(funcAddrInt);
@@ -62,12 +61,13 @@ public class M68kMacJankLoader extends GhidraScript {
                 disassemble(thunkAddr);
                 createFunction(thunkAddr, null);
                 jumptable_entry = jumptable_entry.addNoWrap(8);
+                printf("created %s %s %s\n", jumptable_entry, funcAddr, thunkAddr);
             }
         } catch (MemoryAccessException|AddressOverflowException e) {
         }
-
         // first entry in jumptable is entry point
         Address startAddr = toAddr(getInt(a5.addNoWrap(0x20+4)));
+        printf("startAddr is %s\n", startAddr);
         createLabel(startAddr, "_start", false, SourceType.ANALYSIS);
         if (Arrays.equals(getBytes(startAddr, THINK_C_START.length), THINK_C_START)) {
             printf("Detected Think C, finding main\n");

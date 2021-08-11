@@ -32,6 +32,7 @@ def dump_file(image_filename, path, out_filename):
         flat = f.read()
         v = machfs.Volume()
         v.read(flat)
+        print(v)
         for i in path:
             v = v[i]
         for i in macresources.parse_file(v.rsrc):
@@ -134,6 +135,7 @@ def dump_file(image_filename, path, out_filename):
         entry = jumptable[i:i+8]
         segment_offset = u16(entry[:2])
         segment_num = u16(entry[4:6])
+        print(entry, segment_offset, segment_num)
         if segment_num in segment_bases:
             addr = segment_bases[segment_num] + segment_offset
         else:
@@ -191,3 +193,4 @@ def dump_file(image_filename, path, out_filename):
 
 #dump_file('HeavenEarth13Color.toast', ['Heaven & Earth'], 'dump_heavenandearth')
 #dump_file('disk2.dsk', ["System's Twilight"], 'dump_systemstwilight')
+dump_file('testfile.bin', ["Kid Pix"], 'dump_kidpix')
