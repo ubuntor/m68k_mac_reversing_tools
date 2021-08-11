@@ -39,8 +39,9 @@ public class M68kMacSymbols extends GhidraScript {
                         } else if (length > 0x80) {
                             length -= 0x80;
                         } else {
-                            // TODO: fixed length symbols?
-                            break;
+                            // TODO: 16 byte fixed length symbols
+                            length = 8;
+                            symbolAddr = symbolAddr.addNoWrap(-1);
                         }
                         byte[] symbolBytes = getBytes(symbolAddr, length);
                         if (length > 0) {
@@ -54,6 +55,7 @@ public class M68kMacSymbols extends GhidraScript {
                             }
                             if (goodSymbol) {
                                 String symbol = new String(symbolBytes);
+                                symbol = symbol.replace(" ", "_");
                                 func.setName(symbol, SourceType.ANALYSIS);
                             }
                         }
