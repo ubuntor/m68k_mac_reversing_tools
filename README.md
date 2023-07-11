@@ -14,7 +14,7 @@
 
 **Advantage(s)**: Syscalls are functions (so xrefs work), nicer handling of thunks
 
-**Disadvantage(s)**: Return value for syscalls that use pascal calling convention disappears ([Ghidra Issue](https://github.com/NationalSecurityAgency/ghidra/issues/1962)), stack-based syscall arguments are ugly
+**Disadvantage(s)**: Stack-based syscall arguments are ugly
 
 1. Make a dump using [dump.py](dump.py).
 2. Put the files in [ghidra/processor](ghidra/processor) in `$GHIDRA_INSTALL/Ghidra/Processors/68000/data/languages/`.
@@ -26,5 +26,4 @@
 ## TODO
 * `_FP68K` (and `_*Dispatch`, `_Pack*`, etc.) routine number labelling
 * Finish all syscalls
-* Figure out ghidra issue
 * Direct loader for Ghidra from binhex/derez
