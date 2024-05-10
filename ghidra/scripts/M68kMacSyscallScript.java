@@ -12,6 +12,7 @@ import ghidra.framework.Application;
 import ghidra.program.model.address.*;
 import ghidra.program.model.data.*;
 import ghidra.program.model.lang.BasicCompilerSpec;
+import ghidra.program.model.lang.SpaceNames;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.listing.*;
 import ghidra.program.model.listing.Function.FunctionUpdateType;
@@ -59,7 +60,7 @@ public class M68kMacSyscallScript extends GhidraScript {
                 return;
             }
             Address startAddr = currentProgram.getAddressFactory().getAddressSpace(
-                BasicCompilerSpec.OTHER_SPACE_NAME).getAddress(0x0L);
+                SpaceNames.OTHER_SPACE_NAME).getAddress(0x0L);
             AddUninitializedMemoryBlockCmd cmd = new AddUninitializedMemoryBlockCmd(
                 SYSCALL_SPACE_NAME, null, this.getClass().getName(), startAddr,
                 SYSCALL_SPACE_LENGTH, true, true, true, false, true);
