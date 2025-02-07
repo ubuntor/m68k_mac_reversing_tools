@@ -29,8 +29,9 @@ public class M68kMacSymbols extends GhidraScript {
         for (Function func : currentProgram.getFunctionManager().getFunctionsNoStubs(true)) {
             for (Instruction inst : currentProgram.getListing().getInstructions(func.getBody(), true)) {
                 for (byte[] ending : ENDINGS) {
-                    if (Arrays.equals(ending, inst.getBytes())) {
-                        Address symbolAddr = inst.getAddress().addNoWrap(2);
+                    byte[] instructionBytes = inst.getBytes();
+                    if (Arrays.equals(ending, Arrays.copyOfRange(instructionBytes, 0, 2))) { // take first 2 bytes only
+                        Address symbolAddr = inst.getAddress().addNoWrap(instructionBytes.length);
                         int length = getByte(symbolAddr) & 0xff;
                         symbolAddr = symbolAddr.addNoWrap(1);
                         if (length == 0x80) {
@@ -46,15 +47,20 @@ public class M68kMacSymbols extends GhidraScript {
                         byte[] symbolBytes = getBytes(symbolAddr, length);
                         if (length > 0) {
                             boolean goodSymbol = true;
-                            for (byte b : symbolBytes) {
-                                int i = (int)b & 0xff;
-                                if (i < 32 || i > 126) {
-                                    goodSymbol = false;
+                            for (int i = 0; i < symbolBytes.length; i++) {
+                                int val = symbolBytes[i] & 0xff;
+                                if (val < 32 || val > 126) {
+                                    // Last char might be unprintable (Symantec C++ bug), omit it
+                                    if (i == symbolBytes.length - 1) {
+                                        length--;
+                                    } else {
+                                        goodSymbol = false;
+                                    }
                                     break;
                                 }
                             }
                             if (goodSymbol) {
-                                String symbol = new String(symbolBytes);
+                                String symbol = new String(getBytes(symbolAddr, length));
                                 symbol = symbol.replace(" ", "_");
                                 func.setName(symbol, SourceType.ANALYSIS);
                             }
