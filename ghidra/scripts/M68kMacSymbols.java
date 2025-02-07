@@ -29,8 +29,9 @@ public class M68kMacSymbols extends GhidraScript {
         for (Function func : currentProgram.getFunctionManager().getFunctionsNoStubs(true)) {
             for (Instruction inst : currentProgram.getListing().getInstructions(func.getBody(), true)) {
                 for (byte[] ending : ENDINGS) {
-                    if (Arrays.equals(ending, inst.getBytes())) {
-                        Address symbolAddr = inst.getAddress().addNoWrap(2);
+                    byte[] instructionBytes = inst.getBytes();
+                    if (Arrays.equals(ending, Arrays.copyOfRange(instructionBytes, 0, 2))) { // take first 2 bytes only
+                        Address symbolAddr = inst.getAddress().addNoWrap(instructionBytes.length);
                         int length = getByte(symbolAddr) & 0xff;
                         symbolAddr = symbolAddr.addNoWrap(1);
                         if (length == 0x80) {
